@@ -141,13 +141,22 @@ export default function ChatPanel() {
     isLoading = !geminiSay && loading
   }
 
-  // 행동 배너
+  // 행동 배너 — rational: 사용자 조언 따름, irrational: 페르소나 충동
+  const DIR_ACTION = {
+    sell:         { text: '전량 매도',   color: '#2f64c8', bg: '#e9eefb' },
+    partial_sell: { text: '분할 매도',   color: '#3a6fd0', bg: '#edf0fb' },
+    hold:         { text: '관망 유지',   color: '#27865e', bg: '#eaf6f0' },
+    partial_buy:  { text: '분할 매수',   color: '#b05a1a', bg: '#fbf0e3' },
+    buy:          { text: '추격 매수',   color: '#c0473d', bg: '#fbeceb' },
+  }
   let actionText = '', actionColor = '', actionBg = ''
   if (inResult && result) {
     const pa = result.panicAction
-    if (result.outcome === 'good') {
-      actionText = pa === 'buy' ? '관망 유지 — 추격 안 함' : '계속 보유 (유지)'
-      actionColor = '#27865e'; actionBg = '#eaf6f0'
+    if (result.rational) {
+      // 사용자 조언 방향으로 행동
+      const d = DIR_ACTION[result.dir] || DIR_ACTION.hold
+      actionText = `${d.text} — 조언 따름`
+      actionColor = d.color; actionBg = d.bg
     } else if (result.outcome === 'near') {
       actionText = pa === 'buy' ? '추격매수 참음 (동요)' : '던질 뻔하다 보유 (동요)'
       actionColor = '#b67e1f'; actionBg = '#fbf3e3'
