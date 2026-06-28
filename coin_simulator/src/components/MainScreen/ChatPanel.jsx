@@ -103,6 +103,8 @@ export default function ChatPanel() {
 
   const inResult = phase === 'result'
 
+  const charHue = charData?.hue || '#3a6fd0'
+
   // Avatar 상태
   let face, color, anim = 'none', moodLabel
   if (inResult && stage >= 2) {
@@ -112,12 +114,12 @@ export default function ChatPanel() {
     else if (result?.panicAction === 'buy')  { color = '#d65a4e'; face = 'greedy';   moodLabel = 'FOMO 폭주'; anim = 'pulseGrow 1.2s infinite' }
     else                                     { color = '#2f64c8'; face = 'panic';    moodLabel = '패닉 · 투매'; anim = 'tremble .35s infinite' }
   } else if (inResult) {
-    color = t.baseFace === 'excited' || t.baseFace === 'greedy' ? '#dd8a4a' : '#3a6fd0'
+    color = charHue
     face  = t.baseFace === 'panic' ? 'panic' : 'anxious'
     moodLabel = '판단 중…'
     if (t.baseFace === 'panic') anim = 'tremble .35s infinite'
   } else {
-    color = t.baseFace === 'excited' || t.baseFace === 'greedy' ? '#dd8a4a' : '#3a6fd0'
+    color = charHue
     face  = t.baseFace
     moodLabel = t.baseMood
     if (t.baseFace === 'panic')   anim = 'tremble .35s infinite'

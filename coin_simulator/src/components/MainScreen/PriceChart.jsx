@@ -63,14 +63,14 @@ function buildChart(container, { chartData, revealedCount, playedCount, color, c
   })
 
   if (chartType === 'candle') {
-    const candles = color === '#FFB800' ? DOGE_CANDLES : FTX_CANDLES
+    const candles = color === '#3a6fd0' ? FTX_CANDLES : DOGE_CANDLES
     const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: '#2f9e6f',
-      downColor: '#d65a4e',
-      borderUpColor: '#2f9e6f',
-      borderDownColor: '#d65a4e',
-      wickUpColor: '#2f9e6f',
-      wickDownColor: '#d65a4e',
+      upColor: '#d65a4e',
+      downColor: '#3a6fd0',
+      borderUpColor: '#d65a4e',
+      borderDownColor: '#3a6fd0',
+      wickUpColor: '#d65a4e',
+      wickDownColor: '#3a6fd0',
       priceFormat: { type: 'price', precision: 0, minMove: 1 },
       lastValueVisible: false,
       priceLineVisible: false,
@@ -80,8 +80,8 @@ function buildChart(container, { chartData, revealedCount, playedCount, color, c
     const revealed = chartData.slice(0, revealedCount)
     const mainSeries = chart.addSeries(AreaSeries, {
       lineColor: color,
-      topColor: color + '30',
-      bottomColor: color + '05',
+      topColor: color + '28',
+      bottomColor: color + '04',
       lineWidth: 2,
       priceFormat: { type: 'price', precision: 0, minMove: 1 },
       crosshairMarkerVisible: true,
@@ -99,32 +99,6 @@ function buildChart(container, { chartData, revealedCount, playedCount, color, c
         shape: 'circle',
         size: 1,
       }])
-    }
-
-    if (revealedCount < playedCount) {
-      const hidden = chartData.slice(revealedCount - 1, playedCount)
-      const hiddenSeries = chart.addSeries(LineSeries, {
-        color: '#d0d4db',
-        lineWidth: 1.5,
-        lineStyle: LineStyle.Dashed,
-        crosshairMarkerVisible: false,
-        lastValueVisible: false,
-        priceLineVisible: false,
-      })
-      hiddenSeries.setData(hidden)
-    }
-
-    if (chartData.length > playedCount) {
-      const future = chartData.slice(playedCount - 1)
-      const futureSeries = chart.addSeries(LineSeries, {
-        color: '#d65a4e',
-        lineWidth: 1.5,
-        lineStyle: LineStyle.Dashed,
-        crosshairMarkerVisible: false,
-        lastValueVisible: false,
-        priceLineVisible: false,
-      })
-      futureSeries.setData(future)
     }
   }
 
