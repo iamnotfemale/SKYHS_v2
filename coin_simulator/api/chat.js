@@ -1,28 +1,26 @@
+import { GoogleGenAI } from '@google/genai'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   const { prompt, systemPrompt } = req.body
   const apiKey = process.env.GEMINI_API_KEY
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
 
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt || '당신은 감정적인 개인 투자자입니다.' }] },
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 256, temperature: 0.9 },
-      }),
+    const ai = new GoogleGenAI({ apiKey })
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      config: {
+        systemInstruction: systemPrompt || '당신은 감정적인 개인 투자자입니다.',
+        maxOutputTokens: 256,
+        temperature: 0.9,
+      },
+      contents: prompt,
     })
-    const data = await response.json()
-    if (!response.ok) {
-      console.error('Gemini error:', response.status, JSON.stringify(data))
-      return res.status(200).json({ text: '', error: data?.error?.message || 'Gemini error' })
-    }
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    const text = response.text ?? ''
     res.json({ text })
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    console.error('Gemini error:', e.message)
+    res.status(200).json({ text: '', error: e.message })
   }
 }

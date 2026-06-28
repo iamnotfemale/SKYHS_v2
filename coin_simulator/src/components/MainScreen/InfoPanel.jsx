@@ -94,8 +94,6 @@ export default function InfoPanel() {
   const lineColor  = down ? '#3a6fd0' : '#d65a4e'
   const fgiColor   = t.fgi < 30 ? '#3a6fd0' : t.fgi < 55 ? '#2f9e6f' : '#d65a4e'
   const priceUnit  = isDoge ? '원' : '만원'
-  // 한국 주식 컨벤션: 상승=빨강, 하락=파랑
-  const chartColor = down ? '#3a6fd0' : '#d65a4e'
   const won = n => Math.round(n).toLocaleString('ko-KR')
 
   const selCount = selectedEvidences.length
@@ -127,10 +125,8 @@ export default function InfoPanel() {
         helpKey={chartHelpKey} help={help} actions={actions}
       >
         <PriceChart
-          chartData={chartData}
           revealedCount={revealedCount}
-          playedCount={chartPlayed}
-          color={chartColor}
+          scenario={scenario}
         />
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '7px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '17px', fontWeight: 600, whiteSpace: 'nowrap' }}>
@@ -208,10 +204,8 @@ export default function InfoPanel() {
       <ChartModal
         open={chartExpanded}
         onClose={() => setChartExpanded(false)}
-        chartData={chartData}
         revealedCount={revealedCount}
-        playedCount={chartPlayed}
-        color={chartColor}
+        scenario={scenario}
       />
     </div>
   )
