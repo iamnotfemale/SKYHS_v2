@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import {
   TURNS, SCORE_TABLE, SRCQ, SRCLABEL, REVEAL, PRICE_SERIES,
   DOGE_TURNS, DOGE_SCORE_TABLE, DOGE_REVEAL, DOGE_PRICE_SERIES,
+  CHAR_EVIDENCE_MULT,
 } from '../data/gameContent'
 
 const initialState = {
@@ -68,11 +69,15 @@ export const useGameStore = create((set, get) => ({
       const diffDn = { 쉬움: 0.80, 보통: 1, 어려움: 1.20 }
       const weights = [1, 0.5, 0.25]
 
+      const charMult = CHAR_EVIDENCE_MULT[s.char] || {}
+
       const rawDeltas = s.selectedEvidences.map(src => {
-        const q = SRCQ[src]
-        let d = scoreTable[adv.dir][q]
+        const q  = SRCQ[src]
+        let d    = scoreTable[adv.dir][q]
         d = Math.round(d > 0 ? d * diffUp[s.difficulty] : d * diffDn[s.difficulty])
-        return { src, q, rawDelta: d }
+        const cm = charMult[src] ?? 1.0
+        d = Math.round(d * cm)
+        return { src, q, rawDelta: d, charMult: cm }
       })
 
       // Sort by absolute impact (largest first) to assign weights

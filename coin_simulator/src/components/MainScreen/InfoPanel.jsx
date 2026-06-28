@@ -1,10 +1,20 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED } from '../../data/gameContent'
+import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED, CHAR_EVIDENCE_MULT, CHARACTERS } from '../../data/gameContent'
 import PriceChart from './PriceChart'
 import ChartModal from './ChartModal'
 
 const WEIGHT_LABELS = ['1st', '2nd', '3rd']
+
+function PrefBadge({ mult, hue }) {
+  if (mult >= 1.3) return (
+    <span style={{ fontSize:'9.5px', color: hue, fontWeight:700, border:`1px solid ${hue}55`, borderRadius:'4px', padding:'1px 5px', opacity:.9 }}>선호</span>
+  )
+  if (mult <= 0.8) return (
+    <span style={{ fontSize:'9.5px', color:'#bbb', fontWeight:600, border:'1px solid #e4e7ec', borderRadius:'4px', padding:'1px 5px' }}>비선호</span>
+  )
+  return null
+}
 
 function HelpPopup({ helpKey, actions }) {
   if (!helpKey || !DICT[helpKey]) return null
@@ -22,7 +32,7 @@ function HelpPopup({ helpKey, actions }) {
   )
 }
 
-function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase, src, selectedEvidences, helpKey, help, actions, children }) {
+function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase, src, selectedEvidences, helpKey, help, actions, prefMult, charHue, children }) {
   const idx        = evidencePhase ? selectedEvidences.indexOf(src) : -1
   const isSelected = idx >= 0
   const canAdd     = selectedEvidences.length < 3
@@ -38,7 +48,10 @@ function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase
         transition: 'border-color .25s',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
-          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470', whiteSpace: 'nowrap' }}>{title}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470' }}>{title}</div>
+              {evidencePhase && prefMult != null && <PrefBadge mult={prefMult} hue={charHue} />}
+            </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             {onExpand && (
               <button onClick={onExpand} style={{ fontSize: '13px', color: '#aab0ba', cursor: 'pointer', border: 'none', background: 'none', padding: '2px 4px', lineHeight: 1 }} title="크게보기">↗</button>
@@ -69,9 +82,14 @@ export default function InfoPanel() {
   const phase             = useGameStore(s => s.phase)
   const help              = useGameStore(s => s.help)
   const scenario          = useGameStore(s => s.scenario)
+  const char              = useGameStore(s => s.char)
   const selectedEvidences = useGameStore(s => s.selectedEvidences)
   const actions           = useGameStore(s => s.actions)
   const [chartExpanded, setChartExpanded] = useState(false)
+
+  const charData  = CHARACTERS.find(c => c.id === char)
+  const charHue   = charData?.hue || '#9099a6'
+  const charMult  = CHAR_EVIDENCE_MULT[char] || {}
 
   const isDoge      = scenario === 'doge'
   const turns       = isDoge ? DOGE_TURNS  : TURNS
@@ -123,6 +141,7 @@ export default function InfoPanel() {
         onHelp={() => help === chartHelpKey ? actions.closeHelp() : actions.openHelp(chartHelpKey)}
         onExpand={() => setChartExpanded(true)}
         helpKey={chartHelpKey} help={help} actions={actions}
+        prefMult={charMult.chart} charHue={charHue}
       >
         <PriceChart
           revealedCount={revealedCount}
@@ -146,6 +165,7 @@ export default function InfoPanel() {
         onToggle={() => actions.toggleEvidence('fgi')}
         onHelp={() => help === 'fgi' ? actions.closeHelp() : actions.openHelp('fgi')}
         helpKey="fgi" help={help} actions={actions}
+        prefMult={charMult.fgi} charHue={charHue}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '27px', fontWeight: 600, color: fgiColor }}>{t.fgi}</div>
@@ -171,6 +191,7 @@ export default function InfoPanel() {
         onToggle={() => actions.toggleEvidence('news')}
         onHelp={() => help === newsHelpKey ? actions.closeHelp() : actions.openHelp(newsHelpKey)}
         helpKey={newsHelpKey} help={help} actions={actions}
+        prefMult={charMult.news} charHue={charHue}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {t.news.map((n, i) => (
@@ -190,6 +211,7 @@ export default function InfoPanel() {
         onToggle={() => actions.toggleEvidence('community')}
         onHelp={() => help === 'herd' ? actions.closeHelp() : actions.openHelp('herd')}
         helpKey="herd" help={help} actions={actions}
+        prefMult={charMult.community} charHue={charHue}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
           {t.community.map((c, i) => (

@@ -37,6 +37,14 @@ export const CHARACTERS = [
   {id:'choi', name:'최존버', weak:'고집',        tip:'때론 움직이게',      desc:'무슨 일이 있어도 안 판다',    hue:'#2f9e6f', locked:false},
 ];
 
+// 캐릭터별 근거 유형 가중치 (1.0 = 기본, 1.3~1.5 = 선호, 0.7~0.8 = 비선호)
+export const CHAR_EVIDENCE_MULT = {
+  kim:  { chart: 1.0, fgi: 1.4, news: 1.3, community: 0.8 },  // 공포형: FGI·뉴스가 잘 먹힘
+  park: { chart: 1.5, fgi: 1.2, news: 0.9, community: 1.1 },  // 탐욕형: 차트(고점) 시각화에 반응
+  lee:  { chart: 0.7, fgi: 0.8, news: 1.5, community: 1.5 },  // 정보형: 뉴스·커뮤니티에 쉽게 설득
+  choi: { chart: 1.3, fgi: 1.2, news: 0.7, community: 0.6 },  // 고집형: 차트 수익 시각화·지수만 봄
+};
+
 export const SCENARIOS = [
   {id:'doge', name:'21년 도지코인 광풍',  axis:'탐욕',     note:'밈코인 · FOMO · 일론 트윗',       locked:false},
   {id:'ftx',  name:'22년 거래소 파산',    axis:'공포',     note:'FTX 붕괴 · 패닉셀 · 공포탐욕지수', locked:true},
