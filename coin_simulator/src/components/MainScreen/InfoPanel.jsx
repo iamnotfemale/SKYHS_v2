@@ -1,10 +1,12 @@
+import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED } from '../../data/gameContent'
 import PriceChart from './PriceChart'
+import ChartModal from './ChartModal'
 
 const WEIGHT_LABELS = ['1st', '2nd', '3rd']
 
-function PanelCard({ title, glowColor, onToggle, onHelp, evidencePhase, src, selectedEvidences, children }) {
+function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase, src, selectedEvidences, children }) {
   const idx        = evidencePhase ? selectedEvidences.indexOf(src) : -1
   const isSelected = idx >= 0
   const canAdd     = selectedEvidences.length < 3
@@ -21,6 +23,9 @@ function PanelCard({ title, glowColor, onToggle, onHelp, evidencePhase, src, sel
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
         <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470', whiteSpace: 'nowrap' }}>{title}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+          {onExpand && (
+            <button onClick={onExpand} style={{ fontSize: '13px', color: '#aab0ba', cursor: 'pointer', border: 'none', background: 'none', padding: '2px 4px', lineHeight: 1 }} title="크게보기">↗</button>
+          )}
           {evidencePhase && (
             <button
               onClick={onToggle}
@@ -47,6 +52,7 @@ export default function InfoPanel() {
   const scenario          = useGameStore(s => s.scenario)
   const selectedEvidences = useGameStore(s => s.selectedEvidences)
   const actions           = useGameStore(s => s.actions)
+  const [chartExpanded, setChartExpanded] = useState(false)
 
   const isDoge      = scenario === 'doge'
   const turns       = isDoge ? DOGE_TURNS  : TURNS
@@ -95,6 +101,7 @@ export default function InfoPanel() {
         selectedEvidences={selectedEvidences}
         onToggle={() => actions.toggleEvidence('chart')}
         onHelp={() => actions.openHelp(t.chartConcept)}
+        onExpand={() => setChartExpanded(true)}
       >
         <PriceChart
           chartData={chartData}
@@ -171,6 +178,15 @@ export default function InfoPanel() {
           ))}
         </div>
       </PanelCard>
+
+      <ChartModal
+        open={chartExpanded}
+        onClose={() => setChartExpanded(false)}
+        chartData={chartData}
+        revealedCount={revealedCount}
+        playedCount={chartPlayed}
+        color={chartColor}
+      />
 
       {/* Help popup */}
       {help && DICT[help] && (
