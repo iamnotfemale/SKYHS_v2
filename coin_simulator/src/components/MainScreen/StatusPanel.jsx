@@ -52,8 +52,8 @@ export default function StatusPanel() {
       {/* Trust card */}
       <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470', whiteSpace: 'nowrap' }}>신뢰도</div>
-          <div style={{ fontSize: '11px', color: '#9099a6' }}>합리적 판단 확률</div>
+          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858', whiteSpace: 'nowrap' }}>신뢰도</div>
+          <div style={{ fontSize: '11px', color: '#606c7e' }}>합리적 판단 확률</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', margin: '10px 0 12px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '38px', fontWeight: 600, color: tColor, lineHeight: 1, transition: 'color .4s' }}>{trust}</div>
@@ -65,8 +65,8 @@ export default function StatusPanel() {
 
         {inResult && r && (
           <div className="anim-fadeIn" style={{ marginTop: '14px', paddingTop: '13px', borderTop: '1px solid #f0f2f5' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#9099a6', marginBottom: '8px' }}>정합성 판정</div>
-            <div style={{ fontSize: '12px', color: '#5b6470', lineHeight: 1.55 }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#606c7e', marginBottom: '8px' }}>정합성 판정</div>
+            <div style={{ fontSize: '12px', color: '#3d4858', lineHeight: 1.55 }}>
               조언 <b style={{ color: '#1e232b' }}>"{r.advice}"</b>
             </div>
 
@@ -76,14 +76,14 @@ export default function StatusPanel() {
                 {r.evidences.map((e, i) => (
                   <div key={e.src} style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', fontWeight: 700, color: '#fff', background: WEIGHT_COLORS[i], borderRadius: '4px', padding: '2px 5px', flexShrink: 0 }}>{WEIGHT_PCT[i]}</span>
-                    <span style={{ fontSize: '11.5px', color: '#5b6470', flex: 1 }}>{SRCLABEL[e.src]}</span>
+                    <span style={{ fontSize: '11.5px', color: '#3d4858', flex: 1 }}>{SRCLABEL[e.src]}</span>
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', fontWeight: 700, color: e.weightedDelta >= 0 ? '#27865e' : '#c0473d' }}>
                       {e.weightedDelta >= 0 ? '+' : ''}{e.weightedDelta}
                     </span>
                   </div>
                 ))}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '3px', paddingTop: '6px', borderTop: '1px solid #f0f2f5' }}>
-                  <span style={{ fontSize: '11px', color: '#9099a6', flex: 1, fontWeight: 600 }}>합계</span>
+                  <span style={{ fontSize: '11px', color: '#606c7e', flex: 1, fontWeight: 600 }}>합계</span>
                   <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 700, color: r.delta >= 0 ? '#27865e' : '#c0473d', background: r.delta >= 0 ? '#eaf6f0' : '#fbeceb', borderRadius: '7px', padding: '2px 8px' }}>
                     {r.delta >= 0 ? '+' : ''}{r.delta}%
                   </span>
@@ -91,7 +91,7 @@ export default function StatusPanel() {
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '14px', color: '#9099a6' }}>{r.tB}% → {r.tA}%</span>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '14px', color: '#606c7e' }}>{r.tB}% → {r.tA}%</span>
                 <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 700, color: r.delta >= 0 ? '#27865e' : '#c0473d', background: r.delta >= 0 ? '#eaf6f0' : '#fbeceb', borderRadius: '7px', padding: '2px 8px' }}>
                   {r.delta >= 0 ? '+' : ''}{r.delta}%
                 </span>
@@ -99,7 +99,7 @@ export default function StatusPanel() {
             )}
 
             {r.evidences && r.evidences.length > 0 && (
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: '#9099a6', marginTop: '6px' }}>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: '#606c7e', marginTop: '6px' }}>
                 {r.tB}% → {r.tA}%
               </div>
             )}
@@ -109,10 +109,10 @@ export default function StatusPanel() {
 
       {/* Dice card */}
       <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
-        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470', marginBottom: '6px' }}>확률 주사위</div>
+        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858', marginBottom: '6px' }}>확률 주사위</div>
 
         {diceWaiting && (
-          <div style={{ fontSize: '12px', color: '#aab0ba', lineHeight: 1.55, padding: '6px 0' }}>
+          <div style={{ fontSize: '12px', color: '#7a8395', lineHeight: 1.55, padding: '6px 0' }}>
             근거를 제출하면, 신뢰도만큼의 확률로 합리적 판단을 굴립니다. 100%는 없어요.
           </div>
         )}
@@ -127,14 +127,14 @@ export default function StatusPanel() {
                 animation: 'diceShake .7s ease-out',
               }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#aab0ba', marginTop: '9px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#7a8395', marginTop: '9px' }}>
               <span style={{ color: '#2f9e6f' }}>합리 {r.tA}%</span>
               <span style={{ color: '#c0473d' }}>비합리</span>
             </div>
             <div style={{ marginTop: '11px', fontSize: '13px', fontWeight: 700, color: r.rational ? '#27865e' : '#c0473d' }}>
               {r.rational ? '합리적 판단 — 통과' : '비합리 — 흔들림'}
             </div>
-            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#9099a6', marginTop: '3px' }}>
+            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#606c7e', marginTop: '3px' }}>
               주사위 {Math.round(r.roll)} {r.rational ? '<' : '≥'} 신뢰도 {r.tA}
             </div>
           </div>
@@ -143,22 +143,22 @@ export default function StatusPanel() {
 
       {/* Asset card */}
       <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
-        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470', marginBottom: '13px' }}>{charName}의 자산</div>
+        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858', marginBottom: '13px' }}>{charName}의 자산</div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '9px' }}>
-          <span style={{ fontSize: '12px', color: '#707a88' }}>평가금액</span>
+          <span style={{ fontSize: '12px', color: '#4e5a6e' }}>평가금액</span>
           <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '18px', fontWeight: 600, whiteSpace: 'nowrap' }}>
-            {won(assetVal)}<span style={{ fontSize: '11px', color: '#9099a6', fontWeight: 400 }}> 만원</span>
+            {won(assetVal)}<span style={{ fontSize: '11px', color: '#606c7e', fontWeight: 400 }}> 만원</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '9px' }}>
-          <span style={{ fontSize: '12px', color: '#707a88' }}>평가손익</span>
+          <span style={{ fontSize: '12px', color: '#4e5a6e' }}>평가손익</span>
           <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '14px', fontWeight: 600, color: pnlVal >= 0 ? '#2f9e6f' : '#d65a4e', whiteSpace: 'nowrap' }}>
             {pnlStr}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px solid #f0f2f5' }}>
-          <span style={{ fontSize: '12px', color: '#707a88' }}>진입가</span>
-          <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', color: '#9099a6' }}>
+          <span style={{ fontSize: '12px', color: '#4e5a6e' }}>진입가</span>
+          <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', color: '#606c7e' }}>
             {entryPrice.toLocaleString('ko-KR')} {priceUnit}
           </span>
         </div>

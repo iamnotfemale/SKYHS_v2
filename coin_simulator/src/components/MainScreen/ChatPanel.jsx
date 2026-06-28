@@ -34,7 +34,7 @@ function TypingDots() {
   return (
     <span style={{ display: 'inline-flex', gap: '4px', alignItems: 'center', height: '20px' }}>
       {[0, 1, 2].map(i => (
-        <span key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#aab0ba', animation: `floatUp .9s ease ${i * 0.2}s infinite` }} />
+        <span key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#7a8395', animation: `floatUp .9s ease ${i * 0.2}s infinite` }} />
       ))}
     </span>
   )
@@ -163,21 +163,17 @@ export default function ChatPanel() {
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-      <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', letterSpacing: '.1em', color: '#aab0ba', textTransform: 'uppercase' }}>
-        {moodLabel}
-      </div>
-
-      <div style={{ margin: '20px 0 6px' }}>
+      <div style={{ margin: '14px 0 6px' }}>
         <Avatar face={face} color={color} anim={anim} />
       </div>
-      <div style={{ fontSize: '13px', fontWeight: 600, color: '#707a88' }}>{charName}</div>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: '#4e5a6e' }}>{charName}</div>
 
       {/* 말풍선 */}
       <div key={`${turn}-${inResult}-${stage}`} className="anim-fadeIn" style={{ position: 'relative', background: '#f4f6f9', borderRadius: '16px', padding: '17px 19px', marginTop: '18px', width: '100%', maxWidth: '470px', minHeight: '64px' }}>
         <div style={{ position: 'absolute', top: '-8px', left: '36px', width: '16px', height: '16px', background: '#f4f6f9', transform: 'rotate(45deg)' }} />
         {isLoading
           ? <TypingDots />
-          : <div style={{ fontSize: '15.5px', lineHeight: 1.6, color: '#1e232b' }}>{dialogue}</div>
+          : <div style={{ fontSize: '15.5px', lineHeight: 1.6, color: '#1e232b', wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>{dialogue}</div>
         }
       </div>
 
@@ -186,16 +182,16 @@ export default function ChatPanel() {
       {/* 조언 선택 */}
       {phase === 'advice' && (
         <div className="anim-fadeIn" style={{ width: '100%', maxWidth: '470px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: '#9099a6', marginBottom: '9px' }}>① 어떤 조언을 건넬까요?</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: '#606c7e', marginBottom: '9px' }}>① 어떤 조언을 건넬까요?</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {t.advices.map(a => (
               <button key={a.id} onClick={() => actions.pickAdvice(a.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left', padding: '14px 16px', borderRadius: '13px', background: '#fff', border: '1.5px solid #e4e7ec', transition: 'border-color .15s,background .15s,transform .12s', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', padding: '9px 13px', borderRadius: '11px', background: '#fff', border: '1.5px solid #e4e7ec', transition: 'border-color .15s,background .15s,transform .12s', cursor: 'pointer', fontFamily: 'inherit' }}
                 onMouseOver={e => { e.currentTarget.style.borderColor='#1e232b'; e.currentTarget.style.background='#fafbfc'; e.currentTarget.style.transform='translateY(-1px)' }}
                 onMouseOut={e => { e.currentTarget.style.borderColor='#e4e7ec'; e.currentTarget.style.background='#fff'; e.currentTarget.style.transform='' }}
               >
-                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', fontWeight: 600, color: '#fff', background: '#1e232b', padding: '3px 9px', borderRadius: '7px', flexShrink: 0 }}>{DIR_TAG[a.dir] || a.tag}</span>
-                <span style={{ fontSize: '14px', lineHeight: 1.5, color: '#2c333f' }}>{a.label}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', fontWeight: 600, color: '#fff', background: '#1e232b', padding: '2px 8px', borderRadius: '6px', flexShrink: 0 }}>{DIR_TAG[a.dir] || a.tag}</span>
+                <span style={{ fontSize: '13px', lineHeight: 1.45, color: '#2c333f' }}>{a.label}</span>
               </button>
             ))}
           </div>
@@ -207,9 +203,9 @@ export default function ChatPanel() {
         <div className="anim-fadeIn" style={{ width: '100%', maxWidth: '470px' }}>
           {/* 선택된 조언 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '11px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: '#9099a6' }}>내 조언</span>
+            <span style={{ fontSize: '12px', color: '#606c7e' }}>내 조언</span>
             <span style={{ fontSize: '13px', fontWeight: 600, color: '#1e232b', background: '#eef2fb', border: '1px solid #cdd9f2', borderRadius: '20px', padding: '4px 12px' }}>"{chosenAdvice}"</span>
-            <button onClick={actions.resetAdvice} style={{ fontSize: '11px', color: '#9099a6', marginLeft: 'auto', cursor: 'pointer', border: 'none', background: 'none' }}>조언 바꾸기</button>
+            <button onClick={actions.resetAdvice} style={{ fontSize: '11px', color: '#606c7e', marginLeft: 'auto', cursor: 'pointer', border: 'none', background: 'none' }}>조언 바꾸기</button>
           </div>
 
           {/* 선택된 근거 칩 */}
@@ -226,7 +222,7 @@ export default function ChatPanel() {
                   <div key={src} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', fontWeight: 700, color: '#fff', background: WEIGHT_COLORS[i], borderRadius: '5px', padding: '2px 6px', flexShrink: 0 }}>{WEIGHT_PCT[i]}</span>
                     <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#1e232b' }}>{SRCLABEL[src]}</span>
-                    <button onClick={() => actions.toggleEvidence(src)} style={{ marginLeft: 'auto', fontSize: '11px', color: '#aab0ba', cursor: 'pointer', border: 'none', background: 'none' }}>✕</button>
+                    <button onClick={() => actions.toggleEvidence(src)} style={{ marginLeft: 'auto', fontSize: '11px', color: '#7a8395', cursor: 'pointer', border: 'none', background: 'none' }}>✕</button>
                   </div>
                 ))}
               </div>

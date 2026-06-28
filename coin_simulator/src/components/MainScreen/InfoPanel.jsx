@@ -25,9 +25,9 @@ function HelpPopup({ helpKey, actions }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#3a6fd0' }}>{DICT[helpKey].term}</div>
-        <button onClick={actions.closeHelp} style={{ fontSize: '11px', color: '#9099a6', cursor: 'pointer', border: 'none', background: 'none' }}>닫기 ✕</button>
+        <button onClick={actions.closeHelp} style={{ fontSize: '11px', color: '#606c7e', cursor: 'pointer', border: 'none', background: 'none' }}>닫기 ✕</button>
       </div>
-      <div style={{ fontSize: '12.5px', color: '#5b6470', lineHeight: 1.6, marginTop: '7px' }}>{DICT[helpKey].body}</div>
+      <div style={{ fontSize: '12.5px', color: '#3d4858', lineHeight: 1.6, marginTop: '7px' }}>{DICT[helpKey].body}</div>
     </div>
   )
 }
@@ -49,12 +49,12 @@ function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#5b6470' }}>{title}</div>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858' }}>{title}</div>
               {evidencePhase && prefMult != null && <PrefBadge mult={prefMult} hue={charHue} />}
             </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             {onExpand && (
-              <button onClick={onExpand} style={{ fontSize: '13px', color: '#aab0ba', cursor: 'pointer', border: 'none', background: 'none', padding: '2px 4px', lineHeight: 1 }} title="크게보기">↗</button>
+              <button onClick={onExpand} style={{ fontSize: '13px', color: '#7a8395', cursor: 'pointer', border: 'none', background: 'none', padding: '2px 4px', lineHeight: 1 }} title="크게보기">↗</button>
             )}
             {evidencePhase && (
               <button
@@ -67,7 +67,7 @@ function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase
                 }}
               >{btnLabel}</button>
             )}
-            <button onClick={onHelp} style={{ fontSize: '12px', color: '#aab0ba', cursor: 'pointer', border: 'none', background: 'none' }}>ⓘ</button>
+            <button onClick={onHelp} style={{ fontSize: '12px', color: '#7a8395', cursor: 'pointer', border: 'none', background: 'none' }}>ⓘ</button>
           </div>
         </div>
         {children}
@@ -88,7 +88,7 @@ export default function InfoPanel() {
   const [chartExpanded, setChartExpanded] = useState(false)
 
   const charData  = CHARACTERS.find(c => c.id === char)
-  const charHue   = charData?.hue || '#9099a6'
+  const charHue   = charData?.hue || '#606c7e'
   const charMult  = CHAR_EVIDENCE_MULT[char] || {}
 
   const isDoge      = scenario === 'doge'
@@ -128,7 +128,7 @@ export default function InfoPanel() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <span>＋ 버튼으로 근거를 선택하세요 (최대 3개, 가중 합산)</span>
-          <span style={{ fontWeight: 700, color: selCount > 0 ? '#1e232b' : '#aab0ba' }}>{selCount}/3</span>
+          <span style={{ fontWeight: 700, color: selCount > 0 ? '#1e232b' : '#7a8395' }}>{selCount}/3</span>
         </div>
       )}
 
@@ -149,7 +149,7 @@ export default function InfoPanel() {
         />
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '7px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '17px', fontWeight: 600, whiteSpace: 'nowrap' }}>
-            {won(lastPrice)}<span style={{ fontSize: '11px', color: '#9099a6', fontWeight: 400 }}> {priceUnit}</span>
+            {won(lastPrice)}<span style={{ fontSize: '11px', color: '#606c7e', fontWeight: 400 }}> {priceUnit}</span>
           </div>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 600, color: lineColor }}>
             {chg >= 0 ? '+' : ''}{chg.toFixed(1)}%
@@ -178,7 +178,7 @@ export default function InfoPanel() {
             left: `${t.fgi}%`, transform: 'translateX(-50%)', transition: 'left .5s',
           }} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#aab0ba', marginTop: '7px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#7a8395', marginTop: '7px' }}>
           <span>0 공포</span><span>탐욕 100</span>
         </div>
       </PanelCard>
@@ -197,7 +197,7 @@ export default function InfoPanel() {
           {t.news.map((n, i) => (
             <div key={i} style={{ borderLeft: '2px solid #e4e7ec', paddingLeft: '11px' }}>
               <div style={{ fontSize: '12.5px', fontWeight: 600, lineHeight: 1.45 }}>{n.t}</div>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: '#aab0ba', marginTop: '3px' }}>{n.src}</div>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: '#7a8395', marginTop: '3px' }}>{n.src}</div>
             </div>
           ))}
         </div>
@@ -217,7 +217,7 @@ export default function InfoPanel() {
           {t.community.map((c, i) => (
             <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
               <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e8ebef', flexShrink: 0, marginTop: '1px' }} />
-              <div style={{ fontSize: '12px', color: '#5b6470', lineHeight: 1.45 }}>{c.t}</div>
+              <div style={{ fontSize: '12px', color: '#3d4858', lineHeight: 1.45 }}>{c.t}</div>
             </div>
           ))}
         </div>
