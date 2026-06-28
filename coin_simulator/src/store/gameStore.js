@@ -33,7 +33,7 @@ export const useGameStore = create((set, get) => ({
     restart:   () => set({ ...initialState, screen: 'start' }),
     selChar:   (id) => set({ char: id }),
     selScen:   (id) => set({ scenario: id }),
-    startGame: () => set({ ...initialState, screen: 'main', trust: 35, startTrust: 35 }),
+    startGame: () => set(s => ({ ...initialState, char: s.char, scenario: s.scenario, screen: 'main', trust: 35, startTrust: 35 })),
     openHelp:  (k) => set(s => ({ help: k, opened: s.opened.includes(k) ? s.opened : [...s.opened, k] })),
     closeHelp: () => set({ help: null }),
 
