@@ -2,10 +2,10 @@ import { useGameStore } from '../store/gameStore'
 
 const DOGE_PTS = [65, 77, 86, 121, 228, 467, 513, 395, 388, 295]
 const D_MIN = Math.min(...DOGE_PTS), D_MAX = Math.max(...DOGE_PTS)
-const CW = 160, CH = 70
+const CW = 160, CH = 56
 const D_COORDS = DOGE_PTS.map((v, i) => {
   const x = (i / (DOGE_PTS.length - 1)) * CW
-  const y = CH - ((v - D_MIN) / (D_MAX - D_MIN)) * CH
+  const y = CH - ((v - D_MIN) / (D_MAX - D_MIN)) * (CH - 4) - 2
   return `${x.toFixed(1)},${y.toFixed(1)}`
 })
 const D_LINE = `M${D_COORDS.join('L')}`
@@ -17,161 +17,192 @@ export default function StartScreen() {
   return (
     <div style={{
       minHeight: '100vh',
+      background: '#f4f6f9',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '48px 24px',
-      background: 'linear-gradient(135deg, #0d1117 0%, #1a1f2e 60%, #0f1620 100%)',
-      position: 'relative',
-      overflow: 'hidden',
+      fontFamily: 'Pretendard, system-ui, sans-serif',
+      animation: 'fadeIn .4s ease',
     }}>
-      {/* 배경 글로우 */}
-      <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,184,0,.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '36px', zIndex: 1 }}>
+      {/* 상단 레이블 */}
+      <div style={{
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: '11px', letterSpacing: '.18em', color: '#9099a6',
+        textTransform: 'uppercase', marginBottom: '36px',
+      }}>
+        Coin Emotion Game &nbsp;·&nbsp; 투자 감정 시뮬레이터
+      </div>
 
-        {/* 상단 레이블 */}
-        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', letterSpacing: '.2em', color: '#4a5568', textTransform: 'uppercase' }}>
-          COIN EMOTION GAME · 투자 감정 시뮬레이터
-        </div>
-
-        {/* ── 폰 목업 ── */}
+      {/* 폰 목업 */}
+      <div style={{
+        width: '210px', height: '400px',
+        borderRadius: '36px',
+        background: '#1e232b',
+        boxShadow: '0 24px 60px rgba(20,30,50,.18), 0 2px 8px rgba(20,30,50,.08)',
+        padding: '3px',
+        marginBottom: '36px',
+        position: 'relative',
+      }}>
+        {/* 내부 스크린 */}
         <div style={{
-          position: 'relative',
-          width: '220px',
-          height: '420px',
-          borderRadius: '38px',
-          background: 'linear-gradient(180deg, #1c2130 0%, #141822 100%)',
-          border: '2px solid #2a3040',
-          boxShadow: '0 30px 80px rgba(0,0,0,.7), 0 0 0 1px #0d1117, inset 0 1px 0 rgba(255,255,255,.05)',
+          width: '100%', height: '100%',
+          borderRadius: '33px',
+          background: '#fff',
           overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
         }}>
           {/* 노치 */}
-          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '80px', height: '26px', background: '#0d1117', borderRadius: '0 0 18px 18px', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1e2535' }} />
-            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#2a3345', marginTop: '1px' }} />
-          </div>
+          <div style={{
+            flexShrink: 0,
+            height: '28px',
+            background: '#1e232b',
+            borderRadius: '0 0 18px 18px',
+            margin: '0 auto',
+            width: '72px',
+          }} />
 
-          <div style={{ paddingTop: '34px', paddingLeft: '16px', paddingRight: '16px' }}>
-            {/* 상태 바 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', color: '#4a5568', letterSpacing: '.06em' }}>
-                INCOMING · 2021.04.19
-              </div>
-              <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end' }}>
-                {[5, 7, 9, 5].map((h, i) => (
-                  <div key={i} style={{ width: '3px', height: `${h}px`, background: i < 2 ? '#FFB800' : '#2a3345', borderRadius: '1px' }} />
-                ))}
-              </div>
+          <div style={{ flex: 1, padding: '12px 16px 16px', display: 'flex', flexDirection: 'column' }}>
+
+            {/* 상태바 */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              marginBottom: '16px',
+            }}>
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', color: '#9099a6' }}>9:41</span>
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', color: '#9099a6' }}>● ●</span>
             </div>
 
-            {/* 발신자 아바타 */}
+            {/* 발신자 */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ position: 'relative', width: '72px', height: '72px' }}>
-                <div className="anim-ringPulse" style={{ position: 'absolute', inset: '-8px', borderRadius: '50%', border: '1.5px solid rgba(255,184,0,.35)' }} />
-                <div className="anim-ringPulse" style={{ position: 'absolute', inset: '-18px', borderRadius: '50%', border: '1px solid rgba(255,184,0,.15)', animationDelay: '.7s' }} />
-                <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, #2a2010, #3a2d10)', border: '2px solid rgba(255,184,0,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px' }}>
-                  😰
-                </div>
+              <div style={{
+                width: '60px', height: '60px', borderRadius: '50%',
+                background: '#f4f6f9',
+                border: '2px solid #e4e7ec',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '26px', marginBottom: '8px',
+              }}>
+                😰
               </div>
-              <div style={{ marginTop: '10px', fontSize: '15px', fontWeight: 700, color: '#e8e8e8' }}>김불안</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1e232b' }}>김불안</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '3px' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', animation: 'pulseGrow 1.2s ease-in-out infinite' }} />
-                <div style={{ fontSize: '10px', color: '#9099a6', fontFamily: "'IBM Plex Mono',monospace" }}>패닉 중...</div>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#d65a4e', animation: 'pulseGrow 1.4s ease-in-out infinite' }} />
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', color: '#9099a6' }}>패닉 중...</span>
               </div>
             </div>
 
-            {/* DOGE 미니 차트 */}
-            <div style={{ background: 'rgba(255,184,0,.04)', borderRadius: '12px', border: '1px solid rgba(255,184,0,.12)', padding: '8px 10px', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '8px', color: '#FFB800', letterSpacing: '.06em' }}>DOGE/KRW</div>
-                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', color: '#ef4444', fontWeight: 700 }}>-42.5%</div>
+            {/* 미니 차트 */}
+            <div style={{
+              background: '#f4f6f9', borderRadius: '10px',
+              border: '1px solid #e4e7ec',
+              padding: '8px 10px', marginBottom: '14px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '8px', color: '#9099a6' }}>COIN/KRW</span>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', fontWeight: 700, color: '#d65a4e' }}>-42%</span>
               </div>
-              <svg viewBox={`0 0 ${CW} ${CH}`} style={{ width: '100%', height: '52px', display: 'block', overflow: 'visible' }}>
+              <svg viewBox={`0 0 ${CW} ${CH}`} style={{ width: '100%', height: '44px', display: 'block' }}>
                 <defs>
-                  <linearGradient id="dgGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#FFB800" stopOpacity="0.18" />
-                    <stop offset="100%" stopColor="#FFB800" stopOpacity="0" />
+                  <linearGradient id="sGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1e232b" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#1e232b" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <path d={D_AREA} fill="url(#dgGrad)" />
-                <path d={D_LINE} fill="none" stroke="#FFB800" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx={(6 / 9) * CW} cy="0.5" r="2.5" fill="#FFB800" opacity="0.8" />
-                <line x1={(6 / 9) * CW} y1="3" x2={(6 / 9) * CW} y2={CH} stroke="rgba(255,184,0,.15)" strokeWidth="1" strokeDasharray="3,3" />
+                <path d={D_AREA} fill="url(#sGrad)" />
+                <path d={D_LINE} fill="none" stroke="#1e232b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
-                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '7px', color: '#4a5568' }}>Apr 1</div>
-                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '7px', color: '#FFB800', opacity: 0.7 }}>▲ May 8</div>
-                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '7px', color: '#4a5568' }}>May 3</div>
-              </div>
             </div>
 
-            {/* 수신 / 거절 버튼 */}
-            <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            {/* 수신 버튼 */}
+            <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 'auto' }}>
+              {/* 거절 (비활성) */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(239,68,68,.12)', border: '1px solid rgba(239,68,68,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-                  📵
+                <div style={{
+                  width: '44px', height: '44px', borderRadius: '50%',
+                  background: '#f0f2f5', border: '1px solid #e4e7ec',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M17.48 12.57l-2.3 2.3c-.3.3-.74.4-1.12.24a15.1 15.1 0 01-4.5-3.17 15.1 15.1 0 01-3.17-4.5.98.98 0 01.24-1.12l2.3-2.3c.39-.38.39-1.02 0-1.41L6.7 1.22a1 1 0 00-1.41 0l-2.3 2.3C1.97 4.53 1.7 6 2.13 7.4a22.1 22.1 0 005.27 8.62 22.1 22.1 0 008.62 5.27c1.4.43 2.87.16 3.88-.85l2.3-2.3a1 1 0 000-1.41l-2.3-2.3a1 1 0 00-1.42-.06z" fill="#c8cdd4"/>
+                    <line x1="3" y1="3" x2="21" y2="21" stroke="#c8cdd4" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
                 </div>
-                <div style={{ fontSize: '9px', color: '#4a5568' }}>거절</div>
+                <span style={{ fontSize: '9px', color: '#aab0ba' }}>거절</span>
               </div>
 
-              <button onClick={receive} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                <div style={{ position: 'relative', width: '54px', height: '54px' }}>
-                  <div style={{ position: 'absolute', inset: '-8px', borderRadius: '50%', background: 'rgba(34,197,94,.15)', animation: 'pulseGrow 1.4s ease-in-out infinite' }} />
-                  <div
-                    style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'linear-gradient(135deg, #16a34a, #22c55e)', boxShadow: '0 4px 20px rgba(34,197,94,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', position: 'relative', zIndex: 1, transition: 'transform .15s' }}
-                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                    onMouseOut={e => e.currentTarget.style.transform = ''}
-                  >
-                    📞
-                  </div>
+              {/* 수신 (CTA) */}
+              <button
+                onClick={receive}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                }}
+              >
+                <div style={{
+                  width: '52px', height: '52px', borderRadius: '50%',
+                  background: '#2f9e6f',
+                  boxShadow: '0 4px 16px rgba(47,158,111,.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'transform .15s, box-shadow .15s',
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(47,158,111,.4)' }}
+                onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px rgba(47,158,111,.3)' }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C9.63 21 3 14.37 3 6c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.27 1.03l-2.2 2.2z" fill="white"/>
+                  </svg>
                 </div>
-                <div style={{ fontSize: '9px', color: '#22c55e', fontWeight: 600 }}>수신</div>
+                <span style={{ fontSize: '9px', color: '#2f9e6f', fontWeight: 600 }}>수신</span>
               </button>
             </div>
+
           </div>
 
-          {/* 홈 바 */}
-          <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', width: '60px', height: '4px', borderRadius: '2px', background: '#2a3040' }} />
-        </div>
-
-        {/* 폰 아래 텍스트 */}
-        <div style={{ textAlign: 'center', maxWidth: '320px' }}>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: '#e8e8e8', lineHeight: 1.4 }}>
-            "끝났어요… 지금 다 팔까요?"
+          {/* 홈바 */}
+          <div style={{ height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '52px', height: '4px', borderRadius: '2px', background: '#e4e7ec' }} />
           </div>
-          <div style={{ fontSize: '13px', color: '#5a6880', marginTop: '8px', lineHeight: 1.7 }}>
-            패닉에 빠진 김불안을&nbsp;
-            <span style={{ color: '#FFB800' }}>근거 있는 조언</span>으로 진정시켜라.
-          </div>
-        </div>
-
-        {/* 메인 CTA */}
-        <button
-          onClick={receive}
-          style={{
-            padding: '14px 40px',
-            borderRadius: '14px',
-            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-            color: '#fff',
-            fontSize: '16px',
-            fontWeight: 700,
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            boxShadow: '0 6px 24px rgba(34,197,94,.4)',
-            transition: 'transform .15s, box-shadow .15s',
-          }}
-          onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(34,197,94,.5)' }}
-          onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 6px 24px rgba(34,197,94,.4)' }}
-        >
-          📞&nbsp;&nbsp;전화 받기
-        </button>
-
-        <div style={{ fontSize: '10px', color: '#3a4050', fontFamily: "'IBM Plex Mono',monospace", letterSpacing: '.05em' }}>
-          DOGE · 실제 Upbit 2021 데이터 기반 · Gemini AI 반응
         </div>
       </div>
+
+      {/* 텍스트 */}
+      <div style={{ textAlign: 'center', maxWidth: '320px', marginBottom: '28px' }}>
+        <h1 style={{ fontSize: '21px', fontWeight: 700, color: '#1e232b', lineHeight: 1.45, margin: '0 0 10px' }}>
+          "끝났어요… 지금 다 팔까요?"
+        </h1>
+        <p style={{ fontSize: '14px', color: '#707a88', lineHeight: 1.7, margin: 0 }}>
+          패닉에 빠진 투자자를 근거 있는 조언으로 진정시켜라.
+        </p>
+      </div>
+
+      {/* CTA 버튼 */}
+      <button
+        onClick={receive}
+        style={{
+          padding: '15px 40px', borderRadius: '13px',
+          background: '#1e232b', color: '#fff',
+          fontSize: '15px', fontWeight: 600,
+          border: 'none', cursor: 'pointer',
+          fontFamily: 'inherit',
+          transition: 'background .15s, transform .15s',
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = '#2c333f'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+        onMouseOut={e => { e.currentTarget.style.background = '#1e232b'; e.currentTarget.style.transform = '' }}
+      >
+        전화 받기 →
+      </button>
+
+      {/* 하단 메타 */}
+      <div style={{
+        marginTop: '20px',
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: '10px', color: '#c8cdd4', letterSpacing: '.08em',
+      }}>
+        실제 Upbit 데이터 기반 · Gemini AI 반응
+      </div>
+
     </div>
   )
 }

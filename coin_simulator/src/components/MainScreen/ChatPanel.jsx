@@ -124,17 +124,17 @@ export default function ChatPanel() {
     if (t.baseFace === 'excited' || t.baseFace === 'greedy') anim = 'pulseGrow 1.2s infinite'
   }
 
-  // 대사 결정 (Gemini 우선, 없으면 "…" 폴백)
+  // 대사 결정 (Gemini 우선, 실패 시 하드코딩 폴백)
   let dialogue, isLoading = false
   if (inResult) {
     if (stage >= 3) {
-      dialogue  = geminiReflect || '…'
+      dialogue  = geminiReflect || result?.reflect || '…'
       isLoading = stage >= 3 && !geminiReflect && loading
     } else {
       isLoading = true
     }
   } else {
-    dialogue  = geminiSay || '…'
+    dialogue  = geminiSay || t.say || '…'
     isLoading = !geminiSay && loading
   }
 

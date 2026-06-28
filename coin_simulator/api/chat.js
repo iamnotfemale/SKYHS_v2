@@ -16,6 +16,10 @@ export default async function handler(req, res) {
       }),
     })
     const data = await response.json()
+    if (!response.ok) {
+      console.error('Gemini error:', response.status, JSON.stringify(data))
+      return res.status(200).json({ text: '', error: data?.error?.message || 'Gemini error' })
+    }
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     res.json({ text })
   } catch (e) {

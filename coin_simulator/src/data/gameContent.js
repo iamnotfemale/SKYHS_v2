@@ -32,9 +32,9 @@ export const DICT = {
 
 export const CHARACTERS = [
   {id:'kim',  name:'김불안', weak:'공포',        tip:'안심시킬 근거 제시',  desc:'작은 악재에도 크게 흔들린다', hue:'#3a6fd0', locked:false},
-  {id:'park', name:'박욕심', weak:'탐욕',        tip:'흥분 가라앉히기',    desc:'오르면 더 사려고 안달',       hue:'#d65a4e', locked:true},
-  {id:'lee',  name:'이초보', weak:'정보 휩쓸림',  tip:'뉴스 거르는 법 코칭', desc:'헤드라인에 휘둘린다',        hue:'#7a83d0', locked:true},
-  {id:'choi', name:'최존버', weak:'고집',        tip:'때론 움직이게',      desc:'무슨 일이 있어도 안 판다',    hue:'#2f9e6f', locked:true},
+  {id:'park', name:'박욕심', weak:'탐욕',        tip:'흥분 가라앉히기',    desc:'오르면 더 사려고 안달',       hue:'#d65a4e', locked:false},
+  {id:'lee',  name:'이초보', weak:'정보 휩쓸림',  tip:'뉴스 거르는 법 코칭', desc:'헤드라인에 휘둘린다',        hue:'#7a83d0', locked:false},
+  {id:'choi', name:'최존버', weak:'고집',        tip:'때론 움직이게',      desc:'무슨 일이 있어도 안 판다',    hue:'#2f9e6f', locked:false},
 ];
 
 export const SCENARIOS = [
