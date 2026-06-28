@@ -59,7 +59,7 @@ export default function ChartModal({ open, onClose, revealedCount, scenario = 'd
     bgSeries.setData(bgCandles)
 
     const gameSeries = chart.addSeries(CandlestickSeries, {
-      upColor: 'rgba(214,90,78,.12)', downColor: 'rgba(58,111,208,.12)',
+      upColor: '#d65a4e', downColor: '#3a6fd0',
       borderUpColor: '#d65a4e', borderDownColor: '#3a6fd0',
       wickUpColor: '#d65a4e', wickDownColor: '#3a6fd0',
       priceFormat: { type: 'price', precision: 0, minMove: 1 },

@@ -40,6 +40,7 @@ function TypingDots() {
   )
 }
 
+const DIR_TAG = { sell:'매도', partial_sell:'분할매도', hold:'관망', partial_buy:'분할매수', buy:'매수' }
 const WEIGHT_COLORS = ['#2f9e6f', '#3a6fd0', '#dd8a4a']
 const WEIGHT_PCT    = ['100%', '50%', '25%']
 
@@ -193,7 +194,7 @@ export default function ChatPanel() {
                 onMouseOver={e => { e.currentTarget.style.borderColor='#1e232b'; e.currentTarget.style.background='#fafbfc'; e.currentTarget.style.transform='translateY(-1px)' }}
                 onMouseOut={e => { e.currentTarget.style.borderColor='#e4e7ec'; e.currentTarget.style.background='#fff'; e.currentTarget.style.transform='' }}
               >
-                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', fontWeight: 600, color: '#fff', background: '#1e232b', padding: '3px 9px', borderRadius: '7px', flexShrink: 0 }}>{a.tag}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', fontWeight: 600, color: '#fff', background: '#1e232b', padding: '3px 9px', borderRadius: '7px', flexShrink: 0 }}>{DIR_TAG[a.dir] || a.tag}</span>
                 <span style={{ fontSize: '14px', lineHeight: 1.5, color: '#2c333f' }}>{a.label}</span>
               </button>
             ))}

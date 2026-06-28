@@ -157,8 +157,8 @@ export default function PriceChart({ revealedCount, scenario = 'doge' }) {
 
     // ── 게임 시리즈 (한국 컨벤션: 상승=빨강, 하락=파랑) ──────
     const gameSeries = chart.addSeries(CandlestickSeries, {
-      upColor:         'rgba(214,90,78,.12)',
-      downColor:       'rgba(58,111,208,.12)',
+      upColor:         '#d65a4e',
+      downColor:       '#3a6fd0',
       borderUpColor:   '#d65a4e',
       borderDownColor: '#3a6fd0',
       wickUpColor:     '#d65a4e',
