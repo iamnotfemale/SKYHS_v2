@@ -10,6 +10,7 @@ export default function MainScreen() {
   const char     = useGameStore(s => s.char)
   const scenario = useGameStore(s => s.scenario)
   const tutorial = useGameStore(s => s.tutorial)
+  const actions  = useGameStore(s => s.actions)
 
   const charName     = CHARACTERS.find(c => c.id === char)?.name   || ''
   const scenarioName = SCENARIOS.find(s => s.id === scenario)?.name || ''
@@ -25,6 +26,16 @@ export default function MainScreen() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: '#fff', borderBottom: '1px solid #e4e7ec', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <button
+            onClick={actions.backToSelect}
+            style={{ padding: '6px 9px', borderRadius: '8px', color: '#606c7e', fontSize: '12px', fontWeight: 600, transition: 'background .15s,color .15s' }}
+            onMouseOver={e => { e.currentTarget.style.background = '#eef1f5'; e.currentTarget.style.color = '#1e232b' }}
+            onMouseOut={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = '#606c7e' }}
+            aria-label="페르소나 선택으로 돌아가기"
+          >
+            ← 뒤로가기
+          </button>
+          <div style={{ width: '1px', height: '14px', background: '#e4e7ec' }} />
           <div style={{ fontSize: '15px', fontWeight: 700 }}>{scenarioName}</div>
           <div style={{ width: '1px', height: '14px', background: '#e4e7ec' }} />
           <div style={{ fontSize: '13px', color: '#707a88', whiteSpace: 'nowrap' }}>상담 대상 · {charName}</div>
