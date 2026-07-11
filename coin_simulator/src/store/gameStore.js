@@ -120,6 +120,8 @@ export const useGameStore = create((set, get) => {
     result.strikeAction = strikeAction
     result.traded = traded
 
+    const assetSnap = Math.round(units * result.price + cash)
+
     set(prev => ({
       phase: 'result', stage: 0, result,
       trust: result.tA, blew,
@@ -134,6 +136,7 @@ export const useGameStore = create((set, get) => {
         greed: result.panicAction === 'buy', panicAction: result.panicAction,
         traded, tB: result.tB, tA: result.tA,
         intervention: result.intervention,
+        assetSnap,
       }],
       opened: prev.opened.includes(ctx.concept) ? prev.opened : [...prev.opened, ctx.concept],
     }))
@@ -170,11 +173,10 @@ export const useGameStore = create((set, get) => {
       finishTutorial:   () => set(s => {
         if (!s.tutorial) return {}
         const { turns } = scenarioData(s.scenario)
-        const nextTurn  = Math.min(s.turn + 1, turns.length - 1)
         return {
           tutorial: false, tutorialStep: 0,
-          turn: nextTurn,
-          phase: turns[nextTurn].instinct ? 'instinct' : 'advice',
+          turn: s.turn,
+          phase: turns[s.turn].instinct ? 'instinct' : 'advice',
           advice: null, customAdvice: null, result: null, stage: 0, help: null, selectedEvidences: [],
         }
       }),
