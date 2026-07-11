@@ -1,13 +1,47 @@
 import { useGameStore } from '../store/gameStore'
-import { DICT, CHARACTERS, DOGE_INVESTED } from '../data/gameContent'
+import { DICT, CHARACTERS, SRCLABEL } from '../data/gameContent'
+import { DOGE_FULL } from '../data/marketData'
 
-// DOGE 전체 시리즈 (원): 게임 구간(idx 0~11) + SNL 이후(idx 12~15)
+const DIR_LABEL = { sell:'전량 매도', partial_sell:'분할 매도', hold:'관망', partial_buy:'분할 매수', buy:'추격 매수' }
+const OUTCOME_META = {
+  good:  { label: '설득 성공',   color: '#27865e', bg: '#e7f4ee' },
+  near:  { label: '가까스로',    color: '#b67e1f', bg: '#fbf3e3' },
+  panic: { label: '폭주',        color: '#c0473d', bg: '#fbeceb' },
+}
+
+// 턴별 "왜 좋았나/아쉬웠나" 판정 — 근거 구성 + 결과로 문장 생성
+function turnVerdict(h) {
+  const evs    = h.evidences || []
+  const strong = evs.filter(e => e.q === 'best' || e.q === 'strong').length
+  const bad    = evs.filter(e => e.supports === 'bad').length
+  const contra = evs.filter(e => e.supports === 'contra').length
+  if (h.outcome === 'panic') {
+    if (h.intervention?.attempted && !h.intervention.success)
+      return '설득도, 마지막 개입도 실패 — ' + (h.greed ? 'FOMO 폭주를 막지 못함' : '패닉셀을 막지 못함')
+    return '신뢰가 무너져 ' + (h.greed ? 'FOMO 추격매수로 폭주' : '패닉셀로 투매')
+  }
+  if (h.outcome === 'near') {
+    if (h.intervention?.success) return '주사위는 실패했지만 마지막 개입으로 가까스로 진정'
+    return bad + contra > 0 ? '근거가 약해 흔들렸지만 사고는 면함' : '아슬아슬하게 막아냄'
+  }
+  // good
+  if (bad > 0)    return '통했지만 오독한 근거가 섞임 — 운이 따른 판단'
+  if (contra > 0) return '통했지만 근거와 조언이 어긋남 — 논리가 흔들림'
+  if (strong >= 2) return '강한 근거 두 개로 정확히 설득 — 교과서적 판단'
+  if (strong === 1) return '핵심 근거를 짚어 설득 성공'
+  return '설득 성공'
+}
+
+// DOGE 전체 시리즈: Upbit 실제 종가 (게임 구간 idx 0~11 + SNL 이후 idx 12~15)
 // 날짜: 3/31 4/1 4/6 4/13 4/15 4/16 4/19 4/20 4/21 4/23 4/28 5/3  5/8  5/9  5/15 5/31
-const DOGE_FULL     = [65, 77, 86, 121, 228, 467, 513, 395, 388, 295, 376, 539, 440, 380, 280, 200]
-const DOGE_LABELS   = ['3/31','4/1','4/6','4/13','4/15','4/16','4/19','4/20','4/21','4/23','4/28','5/3','5/8','5/9','5/15','5/31']
-const DOGE_ENTRY    = 77    // 4/01 진입가 (원)
 const DOGE_PLAYED   = 12    // idx 0~11이 게임 구간 (5/3까지)
 const SNL_IDX       = 12    // 5/8 SNL 방영일
+
+// SNL 이후 실제 낙폭 (5/8 종가 → 5/31 종가)
+const SNL_CLOSE = DOGE_FULL[SNL_IDX]
+const END_CLOSE = DOGE_FULL[DOGE_FULL.length - 1]
+const SNL_DROP  = Math.round((END_CLOSE / SNL_CLOSE - 1) * 100)
+const SNL_NOTE  = `SNL 이후 DOGE: ${SNL_CLOSE}원(5/8) → ${END_CLOSE}원(5/31), ${SNL_DROP}%`
 
 function buildChart() {
   const W = 320, H = 160, pad = { top: 14, right: 16, bottom: 24, left: 8 }
@@ -32,6 +66,11 @@ export default function EndingScreen() {
   const opened     = useGameStore(s => s.opened)
   const result     = useGameStore(s => s.result)
   const char       = useGameStore(s => s.char)
+  const units      = useGameStore(s => s.units)
+  const cash       = useGameStore(s => s.cash)
+  const investedTotal = useGameStore(s => s.investedTotal)
+  const strikes    = useGameStore(s => s.strikes)
+  const instincts  = useGameStore(s => s.instincts)
   const actions    = useGameStore(s => s.actions)
 
   const charName = CHARACTERS.find(c => c.id === char)?.name || '김불안'
@@ -53,17 +92,16 @@ export default function EndingScreen() {
   const snlX = xs(SNL_IDX)
   const snlY = ys(series[SNL_IDX])
 
-  // ─── 자산 계산 ────────────────────────────────────────
-  const presentPrice  = series[DOGE_PLAYED - 1]    // 539원 (5/3)
-  const snlPrice      = series[SNL_IDX]             // 440원 (5/8)
-  const monthEndPrice = series[series.length - 1]   // 200원 (5/31)
+  // ─── 자산 계산 — 포지션 모델 (스트라이크로 잘린 수량·현금 반영) ───
+  const heldVal = (price) => units * price + cash
+  const pnlAt   = (price) => heldVal(price) - investedTotal
 
-  const presentPnl  = DOGE_INVESTED * (presentPrice / DOGE_ENTRY) - DOGE_INVESTED
-  const snlPnl      = DOGE_INVESTED * (snlPrice / DOGE_ENTRY) - DOGE_INVESTED
-  const monthEndPnl = DOGE_INVESTED * (monthEndPrice / DOGE_ENTRY) - DOGE_INVESTED
+  const presentPnl  = pnlAt(series[DOGE_PLAYED - 1])    // 539원 (5/3)
+  const snlPnl      = pnlAt(series[SNL_IDX])             // 440원 (5/8)
+  const monthEndPnl = pnlAt(series[series.length - 1])   // 200원 (5/31)
+  const lockedPnl   = tradeIdx != null ? pnlAt(series[tradeIdx]) : null
 
-  const lockedPrice = tradeIdx != null ? series[tradeIdx] : null
-  const lockedPnl   = lockedPrice != null ? DOGE_INVESTED * (lockedPrice / DOGE_ENTRY) - DOGE_INVESTED : null
+  const fmt = n => `${n >= 0 ? '+' : '-'}${won(n)}만원`
 
   // ─── 근거 통계 (다중근거 호환) ─────────────────────────
   const allEvidences = hist.flatMap(h =>
@@ -71,7 +109,7 @@ export default function EndingScreen() {
   )
   const total      = Math.max(1, allEvidences.length)
   const strongCount = allEvidences.filter(e => e.q === 'best' || e.q === 'strong').length
-  const socialCount = allEvidences.filter(e => e.q === 'social' || e.q === 'news').length
+  const socialCount = allEvidences.filter(e => e.q === 'weak' || e.q === 'bad' || e.q === 'social' || e.q === 'news').length
   const strongPct  = Math.round(strongCount / total * 100)
   const socialPct  = Math.round(socialCount / total * 100)
   const goodCombo  = hist.filter(h => (h.totalDelta ?? h.delta ?? 0) > 0).length
@@ -79,30 +117,70 @@ export default function EndingScreen() {
   const trustGain  = (trust ?? startTrust) - startTrust
   const buyBlow    = blew && result?.panicAction === 'buy'
 
-  // ─── SNL 에필로그 (trust 기반 3단계) ────────────────────
+  // ─── 데이터 거울 — 탐욕/공포 구간별 근거 품질 + 본능 체크 ───
+  const strongRatio = evs => {
+    if (!evs.length) return null
+    return Math.round(evs.filter(e => e.q === 'best' || e.q === 'strong').length / evs.length * 100)
+  }
+  const greedStrong = strongRatio(hist.filter(h => h.greed).flatMap(h => h.evidences || []))
+  const fearStrong  = strongRatio(hist.filter(h => h.greed === false).flatMap(h => h.evidences || []))
+
+  let greedFearLine = null
+  if (greedStrong != null && fearStrong != null) {
+    if (greedStrong >= fearStrong + 15)
+      greedFearLine = `탐욕 구간에선 강한 근거 ${greedStrong}%로 냉정했지만, 공포 구간에선 ${fearStrong}%로 흔들렸습니다. 당신을 무너뜨리는 건 탐욕보다 공포입니다.`
+    else if (fearStrong >= greedStrong + 15)
+      greedFearLine = `공포 구간에선 강한 근거 ${fearStrong}%로 침착했지만, 탐욕 구간에선 ${greedStrong}%에 그쳤습니다. 당신을 흔드는 건 공포보다 탐욕입니다.`
+    else
+      greedFearLine = `탐욕 구간 ${greedStrong}% · 공포 구간 ${fearStrong}% — 어느 국면에서든 근거의 질이 일정했습니다. 그 일관성이 당신의 무기입니다.`
+  }
+
+  const trapped = instincts.filter(i => i.pick === i.trap).length
+  let instinctLine = null
+  if (instincts.length > 0) {
+    instinctLine = trapped === 0
+      ? `본능 체크 ${instincts.length}번 — 당신의 본능은 한 번도 ${charName}의 충동과 같은 방향을 가리키지 않았습니다. 드문 일입니다.`
+      : `본능 체크 ${instincts.length}번 중 ${trapped}번, 당신의 손도 ${charName}과(와) 같은 버튼 위에 있었습니다. 남을 말리기는 쉽고, 나를 말리기는 어렵습니다.`
+  }
+
+  // ─── 게임 종료 시점(5/3) 코인 노출도 — "안 팔고 얼마나 들고 갔나" ───
+  const endCoinVal = units * series[DOGE_PLAYED - 1]
+  const endTotal   = Math.max(1, endCoinVal + cash)
+  const exposure   = endCoinVal / endTotal          // 0(전량 현금) ~ 1(전량 코인)
+  const exposurePct = Math.round(exposure * 100)
+
+  // ─── SNL 에필로그 — 실제 코인 노출도 기반 (안 판 코인이 폭락을 맞는다) ───
   let epilogue
-  if (trust >= 70) {
+  if (blew) {
+    epilogue = {
+      emoji: '📉',
+      title: `${charName}, 바닥에서 던졌습니다`,
+      story: `조정 국면의 공포를 못 이긴 ${charName}은(는) 저점에서 전량 패닉셀했습니다. 아이러니하게도 도지코인은 그 뒤 SNL 방영일 ${SNL_CLOSE}원까지 더 치솟았습니다 — 던지지만 않았어도 잡을 수 있던 반등이었죠.`,
+      note: SNL_NOTE,
+      color: '#c0473d', bg: '#fbeceb',
+    }
+  } else if (exposure <= 0.45) {
     epilogue = {
       emoji: '🎯',
-      title: `${charName}, 고점을 피했습니다`,
-      story: `당신의 설득을 믿은 ${charName}은(는) SNL 방영 전날 분할 익절에 성공했습니다. 5월 8일 머스크는 SNL 무대에서 도지코인을 '허슬'이라 불렀고, 가격은 방영 직후 -30%를 기록했습니다. 그는 이미 수익권에 있었습니다.`,
-      note: 'SNL 방영 후 DOGE: 539 → 380원 (-29%)',
+      title: '고점 폭락을 피했습니다',
+      story: `${charName}은(는) SNL 전에 코인 대부분을 익절해 현금으로 옮겼습니다(종료 시 코인 비중 ${exposurePct}%). 도지코인은 방영 당일 ${SNL_CLOSE}원까지 치솟았다가 머스크의 '허슬(사기)' 한마디에 방영 중 -30%, 한 달 만에 ${SNL_DROP}% 폭락했지만 — 그는 이미 빠져나온 뒤였습니다.`,
+      note: SNL_NOTE,
       color: '#27865e', bg: '#e7f4ee',
     }
-  } else if (trust >= 40) {
+  } else if (exposure <= 0.75) {
     epilogue = {
       emoji: '⚖️',
-      title: '아슬아슬하게 반은 지켰습니다',
-      story: `${charName}은(는) 일부만 익절하고 남은 포지션을 유지한 채 SNL을 맞이했습니다. 방영 후 도지코인은 -30% 폭락했지만, 미리 팔아둔 절반 덕에 원금은 지킬 수 있었습니다.`,
-      note: 'SNL 방영 후 DOGE: 539 → 380원 (-29%)',
+      title: '절반은 지켰습니다',
+      story: `${charName}은(는) 일부만 익절하고 코인 ${exposurePct}%를 든 채 SNL을 맞았습니다. 방영과 함께 ${SNL_DROP}% 폭락이 시작됐지만, 미리 덜어낸 절반 덕에 치명상은 면했습니다.`,
+      note: SNL_NOTE,
       color: '#b67e1f', bg: '#fbf3e3',
     }
   } else {
     epilogue = {
       emoji: '📉',
-      title: 'SNL의 날, 함께 폭락했습니다',
-      story: `설득에 실패한 ${charName}은(는) SNL 직전까지 풀포지션을 유지했습니다. 머스크가 '허슬'이라 한마디 하자 도지코인은 -30%로 추락했고, 그는 결국 고점 대비 큰 손실을 입었습니다.`,
-      note: 'SNL 방영 후 DOGE: 539 → 380원 (-29%)',
+      title: 'SNL 폭락을 그대로 맞았습니다',
+      story: `${charName}은(는) 고점 물량을 거의 팔지 않고 코인 ${exposurePct}%를 든 채 SNL을 맞았습니다. 머스크가 '허슬'이라 하자 방영 중 -30%, 한 달 만에 ${SNL_DROP}%로 추락 — 많이 산 게 죄가 아니라, 취해서 안 판 게 죄였습니다.`,
+      note: SNL_NOTE,
       color: '#c0473d', bg: '#fbeceb',
     }
   }
@@ -111,26 +189,26 @@ export default function EndingScreen() {
   let verdictTitle, verdictSub, verdictColor, verdictBg
   let mirrorTitle, mirrorBody, mirrorIrony
 
-  if (blew && buyBlow) {
-    verdictColor = '#c0473d'; verdictBg = '#fbeceb'
-    verdictTitle = 'FOMO를 막지 못했습니다'
-    verdictSub   = `결정적 순간 ${charName}의 FOMO를 막지 못했고, 그는 고점에서 추격매수를 단행했습니다.`
-    mirrorTitle  = '당신도 그 분위기에 휩쓸렸습니다'
-    mirrorBody   = `강한 근거 대신 커뮤니티 반응이나 뉴스 분위기를 근거로 댄 순간이 많았습니다. 머스크 트윗 하나에 휩쓸리는 건 ${charName}만이 아니었어요.`
-    mirrorIrony  = '공탐지수가 85를 넘었을 때, 당신은 무슨 근거를 댔나요?'
-  } else if (blew) {
+  if (blew) {
     verdictColor = '#c0473d'; verdictBg = '#fbeceb'
     verdictTitle = '패닉을 막지 못했습니다'
     verdictSub   = `조정 국면에서 ${charName}의 패닉셀을 막지 못했습니다. SNL 카탈리스트가 남아있었는데도요.`
     mirrorTitle  = '공포도 탐욕만큼 비이성적입니다'
     mirrorBody   = "하락할 때 '손절하는 게 맞지 않을까' 싶어지는 건 자연스럽습니다. 그 감각이 당신 근거 선택에도 영향을 미쳤을 거예요."
     mirrorIrony  = '바닥에서 던지는 건 고점에서 사는 것만큼 비싼 실수입니다.'
+  } else if (exposure > 0.75) {
+    verdictColor = '#c0473d'; verdictBg = '#fbeceb'
+    verdictTitle = '팔지 못하고 폭락을 맞았습니다'
+    verdictSub   = `${charName}은(는) 고점 물량을 거의 든 채(코인 ${exposurePct}%) SNL 크래시를 그대로 맞았습니다. 많이 산 게 아니라, 취해서 안 판 게 문제였어요.`
+    mirrorTitle  = '살 땐 과감했지만 팔 줄은 몰랐습니다'
+    mirrorBody   = `추격매수를 막지 못한 것보다, 고점 근처에서 익절할 기회를 흘려보낸 게 컸습니다. FOMO의 진짜 대가는 사는 순간이 아니라 안 파는 순간에 청구됩니다.`
+    mirrorIrony  = '당신의 계좌였다면, 두 배 오른 그 코인을 미련 없이 팔 수 있었을까요?'
   } else if (coherence >= 60) {
     verdictColor = '#27865e'; verdictBg = '#e7f4ee'
     verdictTitle = '설득에 성공했습니다'
     verdictSub   = `${charName}은(는) 끝까지 이성을 유지했어요. 강한 근거로 신뢰도를 높게 유지한 당신 덕분입니다.`
     mirrorTitle  = '당신은 공탐지수로 말했습니다'
-    mirrorBody   = "탐욕장 한복판에서 '지표를 보자'고 말하는 건 쉽지 않습니다. 분위기보다 숫자로 설득한 당신이 있었기에 김불안은 SNL 전날 익절할 수 있었습니다."
+    mirrorBody   = `탐욕장 한복판에서 '지표를 보자'고 말하는 건 쉽지 않습니다. 분위기보다 숫자로 설득한 당신이 있었기에 ${charName}은(는) SNL 전에 익절할 수 있었습니다.`
     mirrorIrony  = "그런데 — 똑같은 상황이 '당신의' 계좌였다면, 이만큼 근거대로 움직일 수 있었을까요?"
   } else {
     verdictColor = '#b67e1f'; verdictBg = '#fbf3e3'
@@ -142,11 +220,9 @@ export default function EndingScreen() {
   }
 
   // 표시할 손익
-  const stat1Val   = blew
-    ? `${(lockedPnl ?? 0) >= 0 ? '+' : '-'}${won(lockedPnl ?? 0)}만원`
-    : `+${won(presentPnl)}만원`
+  const stat1Val   = blew ? fmt(lockedPnl ?? 0) : fmt(presentPnl)
   const stat1Color = blew ? '#d65a4e' : (presentPnl >= 0 ? '#27865e' : '#d65a4e')
-  const stat1Label = blew ? (buyBlow ? '확정 손실 (고점 물림)' : '확정 손실 (패닉셀)') : '5/3 기준 평가수익'
+  const stat1Label = blew ? (buyBlow ? '게임오버 시점 (고점 물림)' : '게임오버 시점 (패닉셀)') : '5/3 기준 평가손익'
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '48px 24px', background: '#f7f9fc' }}>
@@ -196,7 +272,7 @@ export default function EndingScreen() {
             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#aab0ba', marginTop: '6px' }}>
               <span>3/31 진입</span>
               <span style={{ color: dotColor }}>{blew ? (buyBlow ? 'FOMO 풀매수' : '패닉셀') : '5/3 보유 중'}</span>
-              <span style={{ color: '#FF4444' }}>5/8 SNL -29%</span>
+              <span style={{ color: '#FF4444' }}>5/8 SNL 후 {SNL_DROP}%</span>
             </div>
           </div>
 
@@ -208,11 +284,11 @@ export default function EndingScreen() {
             </div>
             <div style={{ background: '#f7f9fc', borderRadius: '13px', padding: '14px' }}>
               <div style={{ fontSize: '11px', color: '#707a88' }}>SNL 당일 (5/8)</div>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '18px', fontWeight: 600, color: snlPnl >= 0 ? '#27865e' : '#d65a4e', marginTop: '5px' }}>+{won(snlPnl)}만원</div>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '18px', fontWeight: 600, color: snlPnl >= 0 ? '#27865e' : '#d65a4e', marginTop: '5px' }}>{fmt(snlPnl)}</div>
             </div>
             <div style={{ background: '#f7f9fc', borderRadius: '13px', padding: '14px' }}>
-              <div style={{ fontSize: '11px', color: '#707a88' }}>5월 말 버텼다면</div>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '18px', fontWeight: 600, color: '#2f64c8', marginTop: '5px' }}>+{won(monthEndPnl)}만원</div>
+              <div style={{ fontSize: '11px', color: '#707a88' }}>5월 말까지 갔다면</div>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '18px', fontWeight: 600, color: '#2f64c8', marginTop: '5px' }}>{fmt(monthEndPnl)}</div>
             </div>
           </div>
         </div>
@@ -226,6 +302,20 @@ export default function EndingScreen() {
             {mirrorIrony}
           </div>
 
+          {/* 데이터 거울 — 이번 판의 실제 기록으로 만든 문장 */}
+          {(greedFearLine || instinctLine || strikes > 0) && (
+            <div style={{ borderLeft: '2px solid rgba(255,255,255,.25)', paddingLeft: '14px', marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', letterSpacing: '.12em', color: '#7a8395', textTransform: 'uppercase' }}>Data Mirror · 이번 판의 기록</div>
+              {greedFearLine && <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#d4d8de', margin: 0 }}>{greedFearLine}</p>}
+              {instinctLine && <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#d4d8de', margin: 0 }}>{instinctLine}</p>}
+              {strikes > 0 && (
+                <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#d4d8de', margin: 0 }}>
+                  패닉 스트라이크 {strikes}/2 — {strikes >= 2 ? '두 번째 폭주는 막지 못했습니다.' : `한 번의 폭주로 계좌 일부가 잘렸지만, 거기서 멈춰 세웠습니다.`}
+                </p>
+              )}
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: '10px' }}>
             <div style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,.06)', borderRadius: '11px', padding: '13px' }}>
               <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '20px', fontWeight: 600, color: '#7bdcaf' }}>{strongPct}%</div>
@@ -233,7 +323,7 @@ export default function EndingScreen() {
             </div>
             <div style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,.06)', borderRadius: '11px', padding: '13px' }}>
               <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '20px', fontWeight: 600, color: '#f0b366' }}>{socialPct}%</div>
-              <div style={{ fontSize: '11px', color: '#aab0ba', marginTop: '4px' }}>분위기 근거 (뉴스·커뮤니티)</div>
+              <div style={{ fontSize: '11px', color: '#aab0ba', marginTop: '4px' }}>약한·틀린 근거 (분위기/오독)</div>
             </div>
             <div style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,.06)', borderRadius: '11px', padding: '13px' }}>
               <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '20px', fontWeight: 600, color: '#c8a8f0' }}>{trustGain >= 0 ? '+' : ''}{trustGain}%p</div>
@@ -241,6 +331,68 @@ export default function EndingScreen() {
             </div>
           </div>
         </div>
+
+        {/* ───── 2.5 턴별 타임라인 ───── */}
+        {hist.length > 0 && (
+          <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '20px', padding: '28px', marginTop: '16px', boxShadow: '0 1px 3px rgba(20,30,50,.05)' }}>
+            <div style={{ display: 'inline-block', padding: '4px 11px', borderRadius: '20px', background: '#eef2fb', fontSize: '12px', fontWeight: 700, color: '#3a6fd0' }}>③ 턴 타임라인</div>
+            <h2 style={{ fontSize: '22px', fontWeight: 700, margin: '13px 0 4px' }}>매 턴, 어떤 선택을 했나</h2>
+            <p style={{ fontSize: '13px', color: '#707a88', margin: '0 0 20px' }}>조언 · 근거 · {charName}의 실제 매매 · 그 선택의 평가</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {hist.map((h, i) => {
+                const om   = OUTCOME_META[h.outcome] || OUTCOME_META.near
+                const evs  = h.evidences || []
+                const last = i === hist.length - 1
+                return (
+                  <div key={i} style={{ display: 'flex', gap: '13px' }}>
+                    {/* 레일 */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: om.bg, color: om.color, fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1.5px solid ${om.color}` }}>
+                        {(h.turnIdx ?? i) + 1}
+                      </div>
+                      {!last && <div style={{ flex: 1, width: '2px', background: '#eef0f3', margin: '2px 0' }} />}
+                    </div>
+                    {/* 내용 */}
+                    <div style={{ flex: 1, paddingBottom: last ? 0 : '18px', minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '5px' }}>
+                        <span style={{ fontSize: '10.5px', fontWeight: 700, color: om.color, background: om.bg, borderRadius: '5px', padding: '2px 7px' }}>{om.label}</span>
+                        <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e232b', wordBreak: 'keep-all' }}>“{h.advice || DIR_LABEL[h.dir] || h.dir}”</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: h.delta >= 0 ? '#27865e' : '#c0473d' }}>
+                          신뢰 {h.tB}→{h.tA} ({h.delta >= 0 ? '+' : ''}{h.delta})
+                        </span>
+                      </div>
+                      {/* 근거 칩 */}
+                      {evs.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '6px' }}>
+                          {evs.map((e, j) => {
+                            const tag = e.supports === 'support' ? { t:'뒷받침', c:'#27865e', b:'#eaf6f0' }
+                                      : e.supports === 'contra'  ? { t:'모순',   c:'#b67e1f', b:'#fbf3e3' }
+                                      : e.supports === 'bad'     ? { t:'오독',   c:'#c0473d', b:'#fbeceb' }
+                                      : { t:'', c:'#707a88', b:'#f0f2f5' }
+                            return (
+                              <span key={j} style={{ fontSize: '10.5px', color: tag.c, background: tag.b, borderRadius: '5px', padding: '2px 7px' }}>
+                                {SRCLABEL[e.src] || e.src}{tag.t ? ` · ${tag.t}` : ''}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      )}
+                      {/* 매매 + 평가 */}
+                      <div style={{ fontSize: '12.5px', color: '#4e5a6e', lineHeight: 1.55 }}>
+                        {h.traded
+                          ? <span style={{ fontFamily: "'IBM Plex Mono',monospace", color: h.traded.side === 'buy' ? '#c0473d' : '#2f64c8', fontWeight: 600 }}>
+                              {charName} {h.traded.side === 'buy' ? '매수' : '매도'} {Math.round(h.traded.krw).toLocaleString('ko-KR')}만원 · </span>
+                          : <span style={{ fontFamily: "'IBM Plex Mono',monospace", color: '#9099a6' }}>매매 없음 · </span>}
+                        <span>{turnVerdict(h)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ───── 3. 학습 리포트 ───── */}
         <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '20px', padding: '28px', marginTop: '16px', boxShadow: '0 1px 3px rgba(20,30,50,.05)' }}>

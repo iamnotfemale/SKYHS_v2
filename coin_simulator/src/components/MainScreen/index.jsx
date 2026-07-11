@@ -3,11 +3,13 @@ import { TURNS, DOGE_TURNS, SCENARIOS, CHARACTERS } from '../../data/gameContent
 import InfoPanel   from './InfoPanel'
 import ChatPanel   from './ChatPanel'
 import StatusPanel from './StatusPanel'
+import TutorialOverlay from './TutorialOverlay'
 
 export default function MainScreen() {
   const turn     = useGameStore(s => s.turn)
   const char     = useGameStore(s => s.char)
   const scenario = useGameStore(s => s.scenario)
+  const tutorial = useGameStore(s => s.tutorial)
 
   const charName     = CHARACTERS.find(c => c.id === char)?.name   || ''
   const scenarioName = SCENARIOS.find(s => s.id === scenario)?.name || ''
@@ -23,9 +25,9 @@ export default function MainScreen() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', background: '#fff', borderBottom: '1px solid #e4e7ec', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ fontSize: '14px', fontWeight: 700 }}>{scenarioName}</div>
+          <div style={{ fontSize: '15px', fontWeight: 700 }}>{scenarioName}</div>
           <div style={{ width: '1px', height: '14px', background: '#e4e7ec' }} />
-          <div style={{ fontSize: '12.5px', color: '#707a88', whiteSpace: 'nowrap' }}>상담 대상 · {charName}</div>
+          <div style={{ fontSize: '13px', color: '#707a88', whiteSpace: 'nowrap' }}>상담 대상 · {charName}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: '#9099a6' }}>
@@ -45,6 +47,7 @@ export default function MainScreen() {
         <ChatPanel />
         <StatusPanel />
       </div>
+      {tutorial && <TutorialOverlay />}
     </div>
   )
 }

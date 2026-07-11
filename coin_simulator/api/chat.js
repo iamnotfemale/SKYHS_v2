@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { prompt, systemPrompt } = req.body
+  const { prompt, systemPrompt, json } = req.body
   const apiKey = process.env.OPENAI_API_KEY
 
   try {
@@ -18,7 +18,8 @@ export default async function handler(req, res) {
           { role: 'user', content: prompt },
         ],
         max_tokens: 256,
-        temperature: 0.9,
+        temperature: json ? 0 : 0.9,
+        ...(json ? { response_format: { type: 'json_object' } } : {}),
       }),
     })
     const data = await response.json()

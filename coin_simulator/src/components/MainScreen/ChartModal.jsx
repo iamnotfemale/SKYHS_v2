@@ -45,9 +45,14 @@ export default function ChartModal({ open, onClose, revealedCount, scenario = 'd
     const rawBg   = scenario === 'doge' ? DOGE_BG   : FTX_BG
     const rawGame = scenario === 'doge' ? DOGE_GAME  : FTX_GAME
 
-    const bgCandles = applyInterval(rawBg, interval)
     const allGame   = applyInterval(rawGame, interval)
     const revGame   = allGame.slice(0, revealedCount)
+    // 배경·게임 캔들이 같은 주/월 버킷으로 합쳐지면 거래량 시리즈에 시간 중복이 생겨 차트가 죽는다.
+    // 게임 첫 버킷 이후의 배경 캔들을 잘라 중복을 원천 차단.
+    const gameStart = allGame[0]?.time
+    const bgCandles = gameStart
+      ? applyInterval(rawBg, interval).filter(c => c.time < gameStart)
+      : applyInterval(rawBg, interval)
 
     const bgSeries = chart.addSeries(CandlestickSeries, {
       upColor: 'rgba(214,90,78,.08)', downColor: 'rgba(58,111,208,.08)',

@@ -1,5 +1,5 @@
 import { useGameStore } from '../../store/gameStore'
-import { PRICE_SERIES, DOGE_PRICE_SERIES, ENTRY_PRICE, DOGE_ENTRY_PRICE, INVESTED, DOGE_INVESTED, CHARACTERS, REVEAL, DOGE_REVEAL, SRCLABEL } from '../../data/gameContent'
+import { PRICE_SERIES, DOGE_PRICE_SERIES, ENTRY_PRICE, DOGE_ENTRY_PRICE, INVESTED, DOGE_INVESTED, CHARACTERS, REVEAL, DOGE_REVEAL, SRCLABEL, DOGE_DATES, FTX_DATES } from '../../data/gameContent'
 
 function trustColor(t) {
   return t < 40 ? '#d65a4e' : t < 70 ? '#dd8a4a' : '#2f9e6f'
@@ -18,13 +18,22 @@ export default function StatusPanel() {
   const tradeIdx = useGameStore(s => s.tradeIdx)
   const char     = useGameStore(s => s.char)
   const scenario = useGameStore(s => s.scenario)
+  const units    = useGameStore(s => s.units)
+  const cash     = useGameStore(s => s.cash)
+  const investedTotal = useGameStore(s => s.investedTotal)
+  const strikes  = useGameStore(s => s.strikes)
 
   const isDoge      = scenario === 'doge'
   const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
   const entryPrice  = isDoge ? DOGE_ENTRY_PRICE  : ENTRY_PRICE
   const reveal      = isDoge ? DOGE_REVEAL       : REVEAL
-  const invested    = isDoge ? DOGE_INVESTED     : INVESTED
   const priceUnit   = isDoge ? '원' : '만원'
+
+  // 현재 시점 날짜 (년월일)
+  const dateArr   = isDoge ? DOGE_DATES : FTX_DATES
+  const iso       = dateArr[reveal[turn]] || dateArr[dateArr.length - 1]
+  const [dy, dm, dd] = iso.split('-')
+  const dateLabel = `${dy}년 ${+dm}월 ${+dd}일`
 
   const charData  = CHARACTERS.find(c => c.id === char)
   const charName  = charData?.name || ''
@@ -35,11 +44,11 @@ export default function StatusPanel() {
 
   const curRevealIdx = reveal[turn]
   const curPrice     = priceSeries[curRevealIdx]
-  const lockedPrice  = tradeIdx != null ? priceSeries[tradeIdx] : null
-  const valPrice     = blew ? lockedPrice : curPrice
-  const assetVal     = invested * ((valPrice || entryPrice) / entryPrice)
-  const pnlVal       = assetVal - invested
-  const pnlPct       = ((valPrice || entryPrice) / entryPrice - 1) * 100
+  // 포지션 모델: 코인 평가액 + 현금(실탄). 원금 = investedTotal(2×invested)
+  const coinVal      = units * curPrice
+  const assetVal     = coinVal + cash
+  const pnlVal       = assetVal - investedTotal
+  const pnlPct       = (assetVal / investedTotal - 1) * 100
   const won = n => Math.round(Math.abs(n)).toLocaleString('ko-KR')
 
   const pnlStr = `${pnlVal >= 0 ? '+' : '-'}${won(pnlVal)}만원 (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%)`
@@ -50,11 +59,21 @@ export default function StatusPanel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '13px', overflowY: 'auto', paddingRight: '2px' }}>
 
+      {/* 날짜 카드 */}
+      <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '14px 17px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#d65a4e', flexShrink: 0 }} />
+          <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '17px', fontWeight: 700, color: '#1e232b', whiteSpace: 'nowrap' }}>{dateLabel}</div>
+        </div>
+        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#9099a6', whiteSpace: 'nowrap' }}>TURN {turn + 1}</div>
+      </div>
+
+      <div data-tutorial="trust-dice">
       {/* Trust card */}
       <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858', whiteSpace: 'nowrap' }}>신뢰도</div>
-          <div style={{ fontSize: '11px', color: '#606c7e' }}>합리적 판단 확률</div>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#3d4858', whiteSpace: 'nowrap' }}>신뢰도</div>
+          <div style={{ fontSize: '12px', color: '#606c7e' }}>조언을 따를 확률</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', margin: '10px 0 12px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '38px', fontWeight: 600, color: tColor, lineHeight: 1, transition: 'color .4s' }}>{trust}</div>
@@ -78,6 +97,13 @@ export default function StatusPanel() {
                   <div key={e.src} style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '9px', fontWeight: 700, color: '#fff', background: WEIGHT_COLORS[i], borderRadius: '4px', padding: '2px 5px', flexShrink: 0 }}>{WEIGHT_PCT[i]}</span>
                     <span style={{ fontSize: '11.5px', color: '#3d4858', flex: 1 }}>{SRCLABEL[e.src]}</span>
+                    {e.supports && (
+                      <span style={{ fontSize: '9.5px', fontWeight: 700, borderRadius: '4px', padding: '1px 5px', flexShrink: 0,
+                        color:      e.supports === 'support' ? '#27865e' : e.supports === 'contra' ? '#b67e1f' : '#c0473d',
+                        background: e.supports === 'support' ? '#eaf6f0' : e.supports === 'contra' ? '#fbf3e3' : '#fbeceb' }}>
+                        {e.supports === 'support' ? '뒷받침' : e.supports === 'contra' ? '조언과 모순' : '오독'}
+                      </span>
+                    )}
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', fontWeight: 700, color: e.weightedDelta >= 0 ? '#27865e' : '#c0473d' }}>
                       {e.weightedDelta >= 0 ? '+' : ''}{e.weightedDelta}
                     </span>
@@ -136,14 +162,16 @@ export default function StatusPanel() {
               {r.rational ? '합리적 판단 — 통과' : '비합리 — 흔들림'}
             </div>
             <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#606c7e', marginTop: '3px' }}>
-              주사위 {Math.round(r.roll)} {r.rational ? '<' : '≥'} 신뢰도 {r.tA}
+              주사위 {Math.round(r.roll)} {r.rational ? '<' : '≥'} 신뢰도 {r.tA}{r.pityBonus > 0 ? ` +${r.pityBonus} (안정 보정)` : ''}
             </div>
           </div>
         )}
       </div>
 
+      </div>
+
       {/* Asset card */}
-      <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
+      <div data-tutorial="assets" style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
         <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858', marginBottom: '13px' }}>{charName}의 자산</div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '9px' }}>
           <span style={{ fontSize: '12px', color: '#4e5a6e' }}>평가금액</span>
@@ -157,6 +185,22 @@ export default function StatusPanel() {
             {pnlStr}
           </span>
         </div>
+
+        {/* 코인 / 현금 분리 */}
+        <div style={{ display: 'flex', gap: '8px', margin: '11px 0 4px' }}>
+          <div style={{ flex: 1, background: '#f7f9fc', borderRadius: '10px', padding: '9px 11px' }}>
+            <div style={{ fontSize: '10.5px', color: '#7a8395', marginBottom: '3px' }}>코인 자산</div>
+            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13.5px', fontWeight: 600, color: '#1e232b', whiteSpace: 'nowrap' }}>{won(coinVal)}<span style={{ fontSize: '10px', color: '#9099a6', fontWeight: 400 }}> 만원</span></div>
+          </div>
+          <div style={{ flex: 1, background: '#f7f9fc', borderRadius: '10px', padding: '9px 11px' }}>
+            <div style={{ fontSize: '10.5px', color: '#7a8395', marginBottom: '3px' }}>현금 (실탄)</div>
+            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13.5px', fontWeight: 600, color: cash > 0 ? '#27865e' : '#c0473d', whiteSpace: 'nowrap' }}>{won(cash)}<span style={{ fontSize: '10px', color: '#9099a6', fontWeight: 400 }}> 만원</span></div>
+          </div>
+        </div>
+        {cash <= 0 && (
+          <div style={{ fontSize: '10.5px', color: '#c0473d', marginBottom: '4px' }}>실탄 소진 — 추가 매수 불가</div>
+        )}
+
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px solid #f0f2f5' }}>
           <span style={{ fontSize: '12px', color: '#4e5a6e' }}>진입가</span>
           <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', color: '#606c7e' }}>
@@ -164,9 +208,17 @@ export default function StatusPanel() {
           </span>
         </div>
 
-        {blew && (
-          <div style={{ marginTop: '12px', padding: '9px 11px', borderRadius: '9px', background: '#fbeceb', fontSize: '12px', fontWeight: 600, color: '#c0473d' }}>
-            {tradeIdx != null && result?.panicAction === 'buy' ? '고점 추격매수 · 물림' : '전량 매도됨 · 손실 확정'}
+        {strikes > 0 && (
+          <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 11px', borderRadius: '9px',
+            background: blew ? '#fbeceb' : '#fbf3e3', fontSize: '12px', fontWeight: 600, color: blew ? '#c0473d' : '#8a6a1f' }}>
+            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', letterSpacing: '.05em' }}>
+              {blew ? '⚡⚡' : '⚡'} {strikes}/2
+            </span>
+            <span>
+              {blew
+                ? (result?.panicAction === 'buy' ? '고점 추격매수 · 물림 확정' : '전량 매도됨 · 손실 확정')
+                : (result?.panicAction === 'buy' ? '절반 추가매수 — 한 번 더 폭주하면 끝' : '절반 매도됨 — 한 번 더 무너지면 끝')}
+            </span>
           </div>
         )}
       </div>

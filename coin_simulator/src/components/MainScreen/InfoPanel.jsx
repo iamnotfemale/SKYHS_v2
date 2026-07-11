@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED, CHAR_EVIDENCE_MULT, CHARACTERS } from '../../data/gameContent'
+import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DOGE_DATES, FTX_DATES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED, CHAR_EVIDENCE_MULT, CHARACTERS } from '../../data/gameContent'
 import PriceChart from './PriceChart'
 import ChartModal from './ChartModal'
 
 const WEIGHT_LABELS = ['1st', '2nd', '3rd']
+const WEIGHT_COLORS = ['#2f9e6f', '#3a6fd0', '#dd8a4a']
+const WEIGHT_PCT    = ['100%', '50%', '25%']
 
 function PrefBadge({ mult, hue }) {
   if (mult >= 1.3) return (
-    <span style={{ fontSize:'9.5px', color: hue, fontWeight:700, border:`1px solid ${hue}55`, borderRadius:'4px', padding:'1px 5px', opacity:.9 }}>선호</span>
+    <span style={{ fontSize:'11px', color: hue, fontWeight:700, border:`1px solid ${hue}55`, borderRadius:'4px', padding:'1px 6px', opacity:.9, whiteSpace:'nowrap', flexShrink:0 }}>선호</span>
   )
   if (mult <= 0.8) return (
-    <span style={{ fontSize:'9.5px', color:'#bbb', fontWeight:600, border:'1px solid #e4e7ec', borderRadius:'4px', padding:'1px 5px' }}>비선호</span>
+    <span style={{ fontSize:'11px', color:'#9aa3b0', fontWeight:600, border:'1px solid #e4e7ec', borderRadius:'4px', padding:'1px 6px', whiteSpace:'nowrap', flexShrink:0 }}>비선호</span>
   )
   return null
 }
@@ -32,12 +34,13 @@ function HelpPopup({ helpKey, actions }) {
   )
 }
 
-function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase, src, selectedEvidences, helpKey, help, actions, prefMult, charHue, children }) {
-  const idx        = evidencePhase ? selectedEvidences.indexOf(src) : -1
-  const isSelected = idx >= 0
+function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase, src, interps, onPickInterp, selectedEvidences, helpKey, help, actions, prefMult, charHue, children }) {
+  const rank       = evidencePhase ? selectedEvidences.findIndex(e => e.src === src) : -1
+  const sel        = rank >= 0 ? selectedEvidences[rank] : null
+  const isSelected = rank >= 0
   const canAdd     = selectedEvidences.length < 3
   const btnBg      = isSelected ? '#1e232b' : (canAdd ? '#2f9e6f' : '#b0b7c1')
-  const btnLabel   = isSelected ? `${WEIGHT_LABELS[idx]} ✓` : '＋ 근거'
+  const btnLabel   = isSelected ? `${WEIGHT_LABELS[rank]} ✓` : '＋ 근거'
 
   return (
     <div>
@@ -47,16 +50,16 @@ function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase
         borderRadius: '16px', padding: '15px',
         transition: 'border-color .25s',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858' }}>{title}</div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '10px' }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#3d4858', lineHeight: 1.35, wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>{title}</div>
               {evidencePhase && prefMult != null && <PrefBadge mult={prefMult} hue={charHue} />}
             </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             {onExpand && (
               <button onClick={onExpand} style={{ fontSize: '13px', color: '#7a8395', cursor: 'pointer', border: 'none', background: 'none', padding: '2px 4px', lineHeight: 1 }} title="크게보기">↗</button>
             )}
-            {evidencePhase && (
+            {evidencePhase && !interps && (
               <button
                 onClick={onToggle}
                 disabled={!isSelected && !canAdd}
@@ -71,6 +74,33 @@ function PanelCard({ title, glowColor, onToggle, onHelp, onExpand, evidencePhase
           </div>
         </div>
         {children}
+
+        {/* 해석 카드 — 같은 데이터, 다른 읽기. 무엇이 맞는 해석인지는 스스로 판단해야 한다 */}
+        {evidencePhase && interps && (
+          <div style={{ marginTop: '11px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#27865e', letterSpacing: '.02em' }}>이 카드, 어떻게 읽으시겠어요?</div>
+            {interps.map((it, i) => {
+              const active   = sel != null && sel.idx === i
+              const disabled = !isSelected && !canAdd
+              return (
+                <button key={i} onClick={() => onPickInterp(i)} disabled={disabled}
+                  style={{
+                    textAlign: 'left', display: 'flex', alignItems: 'center', gap: '7px',
+                    padding: '8px 10px', borderRadius: '9px',
+                    border: `1.5px solid ${active ? '#1e232b' : '#e4e7ec'}`,
+                    background: active ? '#f2f4f7' : '#fff',
+                    cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
+                    opacity: disabled ? 0.5 : 1, transition: 'border-color .15s, background .15s',
+                  }}>
+                  {active && (
+                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', fontWeight: 700, color: '#fff', background: WEIGHT_COLORS[rank], borderRadius: '4px', padding: '2px 5px', flexShrink: 0 }}>{WEIGHT_PCT[rank]}</span>
+                  )}
+                  <span style={{ fontSize: '13px', lineHeight: 1.5, color: active ? '#1e232b' : '#3d4858', wordBreak: 'keep-all' }}>{it.text}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
       {help === helpKey && <HelpPopup helpKey={helpKey} actions={actions} />}
     </div>
@@ -98,7 +128,10 @@ export default function InfoPanel() {
   const coinLabel   = isDoge ? 'DOGE/KRW' : 'BTC/KRW'
   const chartData   = isDoge ? DOGE_CHART_DATA : FTX_CHART_DATA
   const chartPlayed = isDoge ? DOGE_CHART_PLAYED : FTX_CHART_PLAYED
-  const revealedCount = (reveal[turn] ?? 2) + 1
+  const dates       = isDoge ? DOGE_DATES : FTX_DATES
+  // 헤더 날짜(현재 시점)까지만 캔들을 공개 — 미래 캔들이 미리 보이지 않게
+  const headerISO   = dates[reveal[turn]] || dates[dates.length - 1]
+  const revealedCount = Math.max(1, chartData.slice(0, chartPlayed).filter(c => c.time <= headerISO).length)
 
   const t             = turns[turn]
   const evidencePhase = phase === 'evidence'
@@ -127,15 +160,17 @@ export default function InfoPanel() {
           color: '#27865e', background: '#eaf6f0', border: '1px solid #bfe3d0', borderRadius: '9px', padding: '9px 11px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <span>＋ 버튼으로 근거를 선택하세요 (최대 3개, 가중 합산)</span>
+          <span>{t.interps ? '각 카드의 해석 중 옳은 것을 고르세요 (최대 3개)' : '＋ 버튼으로 근거를 선택하세요 (최대 3개, 가중 합산)'}</span>
           <span style={{ fontWeight: 700, color: selCount > 0 ? '#1e232b' : '#7a8395' }}>{selCount}/3</span>
         </div>
       )}
 
       {/* Chart */}
-      <PanelCard
+      <div data-tutorial="chart"><PanelCard
         title={`${coinLabel} · ${t.chartNote}`} glowColor={evGlow}
         evidencePhase={evidencePhase} src="chart"
+        interps={t.interps?.chart}
+        onPickInterp={(i) => actions.toggleEvidence('chart', i)}
         selectedEvidences={selectedEvidences}
         onToggle={() => actions.toggleEvidence('chart')}
         onHelp={() => help === chartHelpKey ? actions.closeHelp() : actions.openHelp(chartHelpKey)}
@@ -155,12 +190,14 @@ export default function InfoPanel() {
             {chg >= 0 ? '+' : ''}{chg.toFixed(1)}%
           </div>
         </div>
-      </PanelCard>
+      </PanelCard></div>
 
       {/* FGI */}
-      <PanelCard
+      <div data-tutorial="fgi"><PanelCard
         title="공포탐욕지수" glowColor={evGlow}
         evidencePhase={evidencePhase} src="fgi"
+        interps={t.interps?.fgi}
+        onPickInterp={(i) => actions.toggleEvidence('fgi', i)}
         selectedEvidences={selectedEvidences}
         onToggle={() => actions.toggleEvidence('fgi')}
         onHelp={() => help === 'fgi' ? actions.closeHelp() : actions.openHelp('fgi')}
@@ -181,12 +218,14 @@ export default function InfoPanel() {
         <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#7a8395', marginTop: '7px' }}>
           <span>0 공포</span><span>탐욕 100</span>
         </div>
-      </PanelCard>
+      </PanelCard></div>
 
       {/* News */}
-      <PanelCard
+      <div data-tutorial="news-community"><PanelCard
         title="이 시점의 뉴스" glowColor={evGlow}
         evidencePhase={evidencePhase} src="news"
+        interps={t.interps?.news}
+        onPickInterp={(i) => actions.toggleEvidence('news', i)}
         selectedEvidences={selectedEvidences}
         onToggle={() => actions.toggleEvidence('news')}
         onHelp={() => help === newsHelpKey ? actions.closeHelp() : actions.openHelp(newsHelpKey)}
@@ -196,17 +235,19 @@ export default function InfoPanel() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {t.news.map((n, i) => (
             <div key={i} style={{ borderLeft: '2px solid #e4e7ec', paddingLeft: '11px' }}>
-              <div style={{ fontSize: '12.5px', fontWeight: 600, lineHeight: 1.45 }}>{n.t}</div>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: '#7a8395', marginTop: '3px' }}>{n.src}</div>
+              <div style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>{n.t}</div>
+              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#7a8395', marginTop: '3px' }}>{n.src}</div>
             </div>
           ))}
         </div>
-      </PanelCard>
+      </PanelCard></div>
 
       {/* Community */}
       <PanelCard
         title="커뮤니티" glowColor={evGlow}
         evidencePhase={evidencePhase} src="community"
+        interps={t.interps?.community}
+        onPickInterp={(i) => actions.toggleEvidence('community', i)}
         selectedEvidences={selectedEvidences}
         onToggle={() => actions.toggleEvidence('community')}
         onHelp={() => help === 'herd' ? actions.closeHelp() : actions.openHelp('herd')}
@@ -217,7 +258,7 @@ export default function InfoPanel() {
           {t.community.map((c, i) => (
             <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
               <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e8ebef', flexShrink: 0, marginTop: '1px' }} />
-              <div style={{ fontSize: '12px', color: '#3d4858', lineHeight: 1.45 }}>{c.t}</div>
+              <div style={{ fontSize: '13px', color: '#3d4858', lineHeight: 1.5, wordBreak: 'keep-all' }}>{c.t}</div>
             </div>
           ))}
         </div>

@@ -3,13 +3,13 @@ import { useState, useCallback } from 'react'
 export function useClaude() {
   const [loading, setLoading] = useState(false)
 
-  const generate = useCallback(async (prompt, systemPrompt) => {
+  const generate = useCallback(async (prompt, systemPrompt, opts = {}) => {
     setLoading(true)
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, systemPrompt }),
+        body: JSON.stringify({ prompt, systemPrompt, json: !!opts.json }),
       })
       const data = await res.json()
       return data.text || ''
