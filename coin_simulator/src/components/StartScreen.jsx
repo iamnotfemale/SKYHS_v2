@@ -28,7 +28,7 @@ export default function StartScreen() {
     }}>
 
       {/* 상단 레이블 */}
-      <div style={{
+      <div className="incoming-phone" style={{
         fontFamily: "'IBM Plex Mono', monospace",
         fontSize: '11px', letterSpacing: '.18em', color: '#9099a6',
         textTransform: 'uppercase', marginBottom: '36px',

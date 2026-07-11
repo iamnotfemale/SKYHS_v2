@@ -60,6 +60,21 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   0%, 100% { box-shadow: 0 0 0 9999px rgba(14, 19, 29, .72), 0 0 0 2px rgba(255,255,255,.9), 0 0 22px rgba(255,255,255,.52); }
   50% { box-shadow: 0 0 0 9999px rgba(14, 19, 29, .72), 0 0 0 2px rgba(255,255,255,.9), 0 0 38px rgba(255,255,255,.85); }
 }
+@keyframes incomingPhone {
+  0%, 12%, 100% { transform: translateX(0) rotate(0); }
+  14% { transform: translateX(-5px) rotate(-1.4deg); }
+  16% { transform: translateX(5px) rotate(1.4deg); }
+  18% { transform: translateX(-5px) rotate(-1.2deg); }
+  20% { transform: translateX(4px) rotate(1.1deg); }
+  22% { transform: translateX(-3px) rotate(-.8deg); }
+  24% { transform: translateX(0) rotate(0); }
+  31% { transform: translateX(-5px) rotate(-1.4deg); }
+  33% { transform: translateX(5px) rotate(1.4deg); }
+  35% { transform: translateX(-5px) rotate(-1.2deg); }
+  37% { transform: translateX(4px) rotate(1.1deg); }
+  39% { transform: translateX(-3px) rotate(-.8deg); }
+  41% { transform: translateX(0) rotate(0); }
+}
 .tutorial-overlay { position: fixed; inset: 0; z-index: 1000; cursor: pointer; }
 .tutorial-spotlight { position: fixed; border-radius: 18px; animation: tutorialGlow 1.5s ease-in-out infinite; pointer-events: none; transition: all .35s ease; }
 .tutorial-copy { position: fixed; z-index: 1; width: min(460px, calc(100vw - 40px)); max-height: calc(100vh - 32px); overflow-y: auto; transform: translateX(-50%); padding: 18px 20px 15px; border-radius: 15px; background: rgba(255,255,255,.98); color: #1e232b; box-shadow: 0 12px 35px rgba(0,0,0,.24); }
@@ -67,3 +82,4 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .tutorial-title { margin-top: 5px; font-size: 17px; font-weight: 750; }
 .tutorial-copy p { margin: 7px 0 10px; font-size: 13px; line-height: 1.65; }
 .tutorial-next { padding-top: 9px; border-top: 1px solid #edf0f3; font-size: 11px; color: #708096; text-align: right; }
+.incoming-phone { transform-origin: 50% 75%; animation: incomingPhone 2.7s ease-in-out infinite; }
