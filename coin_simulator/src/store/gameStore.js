@@ -24,6 +24,8 @@ const initialState = {
   difficulty:        '보통',
   fixedDice:         false,
   selectedEvidences: [],
+  tutorial:          false,
+  tutorialStep:      0,
 }
 
 export const useGameStore = create((set, get) => ({
@@ -34,7 +36,23 @@ export const useGameStore = create((set, get) => ({
     restart:   () => set({ ...initialState, screen: 'start' }),
     selChar:   (id) => set({ char: id }),
     selScen:   (id) => set({ scenario: id }),
-    startGame: () => set(s => ({ ...initialState, char: s.char, scenario: s.scenario, screen: 'main', trust: 35, startTrust: 35 })),
+    startGame: () => set(s => ({ ...initialState, char: s.char, scenario: s.scenario, screen: 'main', trust: 35, startTrust: 35, tutorial: true, tutorialStep: 0 })),
+    nextTutorialStep: () => set(s => s.tutorial ? { tutorialStep: s.tutorialStep + 1 } : {}),
+    finishTutorial: () => set(s => {
+      if (!s.tutorial) return {}
+      const turns = s.scenario === 'doge' ? DOGE_TURNS : TURNS
+      return {
+        tutorial: false,
+        tutorialStep: 0,
+        turn: Math.min(s.turn + 1, turns.length - 1),
+        phase: 'advice',
+        advice: null,
+        result: null,
+        stage: 0,
+        help: null,
+        selectedEvidences: [],
+      }
+    }),
     openHelp:  (k) => set(s => ({ help: k, opened: s.opened.includes(k) ? s.opened : [...s.opened, k] })),
     closeHelp: () => set({ help: null }),
 

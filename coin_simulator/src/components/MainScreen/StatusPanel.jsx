@@ -49,6 +49,7 @@ export default function StatusPanel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '13px', overflowY: 'auto', paddingRight: '2px' }}>
 
+      <div data-tutorial="trust-dice">
       {/* Trust card */}
       <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
@@ -141,8 +142,10 @@ export default function StatusPanel() {
         )}
       </div>
 
+      </div>
+
       {/* Asset card */}
-      <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
+      <div data-tutorial="assets" style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '16px', padding: '17px' }}>
         <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#3d4858', marginBottom: '13px' }}>{charName}의 자산</div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '9px' }}>
           <span style={{ fontSize: '12px', color: '#4e5a6e' }}>평가금액</span>

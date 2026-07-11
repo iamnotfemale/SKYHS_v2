@@ -55,3 +55,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .anim-tremble { animation: tremble .35s infinite; }
 .anim-pulseGrow { animation: pulseGrow 1.2s infinite; }
 .anim-ringPulse { animation: ringPulse 1.8s ease-out infinite; }
+
+@keyframes tutorialGlow {
+  0%, 100% { box-shadow: 0 0 0 9999px rgba(14, 19, 29, .72), 0 0 0 2px rgba(255,255,255,.9), 0 0 22px rgba(255,255,255,.52); }
+  50% { box-shadow: 0 0 0 9999px rgba(14, 19, 29, .72), 0 0 0 2px rgba(255,255,255,.9), 0 0 38px rgba(255,255,255,.85); }
+}
+.tutorial-overlay { position: fixed; inset: 0; z-index: 1000; cursor: pointer; }
+.tutorial-spotlight { position: fixed; border-radius: 18px; animation: tutorialGlow 1.5s ease-in-out infinite; pointer-events: none; transition: all .35s ease; }
+.tutorial-copy { position: fixed; z-index: 1; width: min(460px, calc(100vw - 40px)); max-height: calc(100vh - 32px); overflow-y: auto; transform: translateX(-50%); padding: 18px 20px 15px; border-radius: 15px; background: rgba(255,255,255,.98); color: #1e232b; box-shadow: 0 12px 35px rgba(0,0,0,.24); }
+.tutorial-step { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .09em; color: #708096; }
+.tutorial-title { margin-top: 5px; font-size: 17px; font-weight: 750; }
+.tutorial-copy p { margin: 7px 0 10px; font-size: 13px; line-height: 1.65; }
+.tutorial-next { padding-top: 9px; border-top: 1px solid #edf0f3; font-size: 11px; color: #708096; text-align: right; }
