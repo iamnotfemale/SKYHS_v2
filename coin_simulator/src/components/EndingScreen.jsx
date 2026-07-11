@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import {
   DICT, CHARACTERS, SRCLABEL,
@@ -39,6 +40,39 @@ function turnVerdict(h) {
 
 function won(n) {
   return Math.round(Math.abs(n)).toLocaleString('ko-KR')
+}
+
+function ShareButton() {
+  const [copied, setCopied] = useState(false)
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback: execCommand
+      const ta = document.createElement('textarea')
+      ta.value = window.location.href
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+  return (
+    <button
+      onClick={handleShare}
+      style={{ width: '100%', marginTop: '10px', padding: '15px', borderRadius: '13px', background: copied ? '#27865e' : '#f0f2f5', color: copied ? '#fff' : '#3d4858', fontSize: '15px', fontWeight: 600, transition: 'background .2s, color .2s', cursor: 'pointer', border: 'none', fontFamily: 'inherit' }}
+      onMouseOver={e => { if (!copied) e.currentTarget.style.background = '#e4e7ec' }}
+      onMouseOut={e => { if (!copied) e.currentTarget.style.background = '#f0f2f5' }}
+    >
+      {copied ? '링크 복사됨 ✓' : '공유하기 🔗'}
+    </button>
+  )
 }
 
 // ─── DOGE: SNL 이후 실제 낙폭 (5/8 종가 → 5/31 종가) ───────
@@ -684,6 +718,19 @@ export default function EndingScreen() {
           >
             다시 플레이 ↺
           </button>
+
+          <a
+            href="https://www.upbit.com/home"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: 'block', width: '100%', marginTop: '10px', padding: '15px', borderRadius: '13px', background: '#0070f3', color: '#fff', fontSize: '15px', fontWeight: 600, textAlign: 'center', textDecoration: 'none', transition: 'background .15s', boxSizing: 'border-box' }}
+            onMouseOver={e => e.currentTarget.style.background = '#0060d0'}
+            onMouseOut={e => e.currentTarget.style.background = '#0070f3'}
+          >
+            업비트로 가기 →
+          </a>
+
+          <ShareButton />
         </div>
 
       </div>
