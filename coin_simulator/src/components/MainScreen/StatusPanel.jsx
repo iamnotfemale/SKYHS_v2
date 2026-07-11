@@ -23,6 +23,8 @@ export default function StatusPanel() {
   const investedTotal = useGameStore(s => s.investedTotal)
   const strikes  = useGameStore(s => s.strikes)
 
+  const hist         = useGameStore(s => s.hist)
+
   const sd          = getScenarioData(scenario)
   const priceSeries = sd.priceSeries
   const entryPrice  = sd.entryPrice
@@ -219,6 +221,49 @@ export default function StatusPanel() {
                 ? (result?.panicAction === 'buy' ? '고점 추격매수 · 물림 확정' : '전량 매도됨 · 손실 확정')
                 : (result?.panicAction === 'buy' ? '절반 추가매수 — 한 번 더 폭주하면 끝' : '절반 매도됨 — 한 번 더 무너지면 끝')}
             </span>
+          </div>
+        )}
+
+        {/* 매턴 자산 기록 */}
+        {hist.length > 0 && (
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #f0f2f5' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#606c7e', marginBottom: '7px' }}>자산 기록</div>
+            <div style={{ maxHeight: '148px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px',
+              scrollbarWidth: 'thin', scrollbarColor: '#d6dbe3 transparent' }}>
+              {hist.map((h, i) => {
+                const snap     = h.assetSnap ?? 0
+                const pnl      = snap - investedTotal
+                const pnlPct   = (snap / investedTotal - 1) * 100
+                const positive = pnl >= 0
+                const outcomeColor =
+                  h.outcome === 'good'  ? '#27865e' :
+                  h.outcome === 'near'  ? '#dd8a4a' : '#c0473d'
+                const outcomeLabel =
+                  h.outcome === 'good'  ? '합리' :
+                  h.outcome === 'near'  ? '동요' : '패닉'
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 8px', borderRadius: '8px', background: '#f7f9fc' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', fontWeight: 700,
+                      color: '#9099a6', flexShrink: 0, width: '36px' }}>
+                      T{h.turnIdx + 1}
+                    </span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: outcomeColor,
+                      background: outcomeColor + '18', borderRadius: '4px', padding: '1px 5px', flexShrink: 0 }}>
+                      {outcomeLabel}
+                    </span>
+                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', fontWeight: 600,
+                      color: '#1e232b', flex: 1, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {Math.round(snap).toLocaleString('ko-KR')}만
+                    </span>
+                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', fontWeight: 600,
+                      color: positive ? '#27865e' : '#c0473d', whiteSpace: 'nowrap' }}>
+                      {positive ? '+' : ''}{pnlPct.toFixed(1)}%
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
