@@ -29,6 +29,7 @@ const STEPS = [
   },
   {
     target: 'news-community',
+    targets: ['news-card', 'community-card'],
     title: '뉴스와 커뮤니티',
     body: '뉴스는 사건과 맥락을, 커뮤니티는 투자자들의 분위기를 보여줍니다. 둘 다 중요한 단서지만, 과장과 소문도 섞여 있을 수 있습니다.',
   },
@@ -39,15 +40,29 @@ const STEPS = [
   },
 ]
 
-function useTargetRect(target) {
+function useTargetRect(target, targets) {
   const [rect, setRect] = useState(null)
 
   useLayoutEffect(() => {
     const update = () => {
-      const el = document.querySelector(`[data-tutorial="${target}"]`)
-      if (!el) return
-      const next = el.getBoundingClientRect()
-      setRect({ top: next.top, left: next.left, width: next.width, height: next.height })
+      if (targets && targets.length > 0) {
+        // 여러 요소의 합집합 rect
+        const rects = targets
+          .map(t => document.querySelector(`[data-tutorial="${t}"]`))
+          .filter(Boolean)
+          .map(el => el.getBoundingClientRect())
+        if (rects.length === 0) return
+        const top    = Math.min(...rects.map(r => r.top))
+        const left   = Math.min(...rects.map(r => r.left))
+        const right  = Math.max(...rects.map(r => r.right))
+        const bottom = Math.max(...rects.map(r => r.bottom))
+        setRect({ top, left, width: right - left, height: bottom - top })
+      } else {
+        const el = document.querySelector(`[data-tutorial="${target}"]`)
+        if (!el) return
+        const next = el.getBoundingClientRect()
+        setRect({ top: next.top, left: next.left, width: next.width, height: next.height })
+      }
     }
     update()
     window.addEventListener('resize', update)
@@ -58,7 +73,7 @@ function useTargetRect(target) {
       window.removeEventListener('scroll', update, true)
       cancelAnimationFrame(frame)
     }
-  }, [target])
+  }, [target, targets?.join(',')])
 
   return rect
 }
@@ -67,14 +82,15 @@ export default function TutorialOverlay() {
   const tutorialStep = useGameStore(s => s.tutorialStep)
   const actions = useGameStore(s => s.actions)
   const step = STEPS[tutorialStep]
-  const rect = useTargetRect(step.target)
+  const rect = useTargetRect(step.target, step.targets)
   const copyRef = useRef(null)
   const [copyHeight, setCopyHeight] = useState(185)
 
   useEffect(() => {
-    const target = document.querySelector(`[data-tutorial="${step.target}"]`)
-    target?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
-  }, [step.target])
+    const key = step.targets ? step.targets[0] : step.target
+    const target = document.querySelector(`[data-tutorial="${key}"]`)
+    target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }, [step.target, step.targets])
 
   useLayoutEffect(() => {
     const updateHeight = () => setCopyHeight(copyRef.current?.getBoundingClientRect().height || 185)

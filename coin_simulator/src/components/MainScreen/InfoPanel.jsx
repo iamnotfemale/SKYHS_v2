@@ -223,6 +223,7 @@ export default function InfoPanel() {
       {/* News + Community — 튜토리얼에서 함께 하이라이트 */}
       <div data-tutorial="news-community" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {/* News */}
+        <div data-tutorial="news-card">
         <PanelCard
           title="이 시점의 뉴스" glowColor={evGlow}
           evidencePhase={evidencePhase} src="news"
@@ -243,8 +244,10 @@ export default function InfoPanel() {
             ))}
           </div>
         </PanelCard>
+        </div>
 
         {/* Community */}
+        <div data-tutorial="community-card">
         <PanelCard
           title="커뮤니티" glowColor={evGlow}
           evidencePhase={evidencePhase} src="community"
@@ -265,6 +268,7 @@ export default function InfoPanel() {
             ))}
           </div>
         </PanelCard>
+        </div>
       </div>
 
       <ChartModal
