@@ -1,5 +1,5 @@
 import { useGameStore } from '../../store/gameStore'
-import { PRICE_SERIES, DOGE_PRICE_SERIES, ENTRY_PRICE, DOGE_ENTRY_PRICE, INVESTED, CHARACTERS, REVEAL, DOGE_REVEAL, SRCLABEL } from '../../data/gameContent'
+import { PRICE_SERIES, DOGE_PRICE_SERIES, ENTRY_PRICE, DOGE_ENTRY_PRICE, INVESTED, DOGE_INVESTED, CHARACTERS, REVEAL, DOGE_REVEAL, SRCLABEL } from '../../data/gameContent'
 
 function trustColor(t) {
   return t < 40 ? '#d65a4e' : t < 70 ? '#dd8a4a' : '#2f9e6f'
@@ -23,6 +23,7 @@ export default function StatusPanel() {
   const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
   const entryPrice  = isDoge ? DOGE_ENTRY_PRICE  : ENTRY_PRICE
   const reveal      = isDoge ? DOGE_REVEAL       : REVEAL
+  const invested    = isDoge ? DOGE_INVESTED     : INVESTED
   const priceUnit   = isDoge ? '원' : '만원'
 
   const charData  = CHARACTERS.find(c => c.id === char)
@@ -36,8 +37,8 @@ export default function StatusPanel() {
   const curPrice     = priceSeries[curRevealIdx]
   const lockedPrice  = tradeIdx != null ? priceSeries[tradeIdx] : null
   const valPrice     = blew ? lockedPrice : curPrice
-  const assetVal     = INVESTED * ((valPrice || entryPrice) / entryPrice)
-  const pnlVal       = assetVal - INVESTED
+  const assetVal     = invested * ((valPrice || entryPrice) / entryPrice)
+  const pnlVal       = assetVal - invested
   const pnlPct       = ((valPrice || entryPrice) / entryPrice - 1) * 100
   const won = n => Math.round(Math.abs(n)).toLocaleString('ko-KR')
 

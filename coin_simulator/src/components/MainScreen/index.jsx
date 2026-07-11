@@ -1,5 +1,5 @@
 import { useGameStore } from '../../store/gameStore'
-import { TURNS, SCENARIOS, CHARACTERS } from '../../data/gameContent'
+import { TURNS, DOGE_TURNS, SCENARIOS, CHARACTERS } from '../../data/gameContent'
 import InfoPanel   from './InfoPanel'
 import ChatPanel   from './ChatPanel'
 import StatusPanel from './StatusPanel'
@@ -11,9 +11,10 @@ export default function MainScreen() {
 
   const charName     = CHARACTERS.find(c => c.id === char)?.name   || ''
   const scenarioName = SCENARIOS.find(s => s.id === scenario)?.name || ''
-  const totalTurns   = TURNS.length
+  const turns        = scenario === 'doge' ? DOGE_TURNS : TURNS
+  const totalTurns   = turns.length
 
-  const progDots = TURNS.map((_, i) => ({
+  const progDots = turns.map((_, i) => ({
     color: i <= turn ? '#1e232b' : '#dde1e7',
   }))
 

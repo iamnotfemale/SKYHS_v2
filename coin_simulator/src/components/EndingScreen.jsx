@@ -1,12 +1,11 @@
 import { useGameStore } from '../store/gameStore'
-import { DICT, CHARACTERS } from '../data/gameContent'
+import { DICT, CHARACTERS, DOGE_INVESTED } from '../data/gameContent'
 
 // DOGE 전체 시리즈 (원): 게임 구간(idx 0~11) + SNL 이후(idx 12~15)
 // 날짜: 3/31 4/1 4/6 4/13 4/15 4/16 4/19 4/20 4/21 4/23 4/28 5/3  5/8  5/9  5/15 5/31
 const DOGE_FULL     = [65, 77, 86, 121, 228, 467, 513, 395, 388, 295, 376, 539, 440, 380, 280, 200]
 const DOGE_LABELS   = ['3/31','4/1','4/6','4/13','4/15','4/16','4/19','4/20','4/21','4/23','4/28','5/3','5/8','5/9','5/15','5/31']
 const DOGE_ENTRY    = 77    // 4/01 진입가 (원)
-const DOGE_INVESTED = 100   // 100만원
 const DOGE_PLAYED   = 12    // idx 0~11이 게임 구간 (5/3까지)
 const SNL_IDX       = 12    // 5/8 SNL 방영일
 

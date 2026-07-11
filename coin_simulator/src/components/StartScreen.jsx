@@ -200,7 +200,7 @@ export default function StartScreen() {
         fontFamily: "'IBM Plex Mono', monospace",
         fontSize: '10px', color: '#c8cdd4', letterSpacing: '.08em',
       }}>
-        실제 Upbit 데이터 기반 · Gemini AI 반응
+        실제 시장 데이터 기반 · AI 페르소나 실시간 반응
       </div>
 
     </div>
