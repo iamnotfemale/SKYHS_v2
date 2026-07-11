@@ -220,49 +220,52 @@ export default function InfoPanel() {
         </div>
       </PanelCard></div>
 
-      {/* News */}
-      <div data-tutorial="news-community"><PanelCard
-        title="이 시점의 뉴스" glowColor={evGlow}
-        evidencePhase={evidencePhase} src="news"
-        interps={t.interps?.news}
-        onPickInterp={(i) => actions.toggleEvidence('news', i)}
-        selectedEvidences={selectedEvidences}
-        onToggle={() => actions.toggleEvidence('news')}
-        onHelp={() => help === newsHelpKey ? actions.closeHelp() : actions.openHelp(newsHelpKey)}
-        helpKey={newsHelpKey} help={help} actions={actions}
-        prefMult={charMult.news} charHue={charHue}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {t.news.map((n, i) => (
-            <div key={i} style={{ borderLeft: '2px solid #e4e7ec', paddingLeft: '11px' }}>
-              <div style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>{n.t}</div>
-              <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#7a8395', marginTop: '3px' }}>{n.src}</div>
-            </div>
-          ))}
-        </div>
-      </PanelCard></div>
+      {/* News + Community — 튜토리얼에서 함께 하이라이트 */}
+      <div data-tutorial="news-community" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* News */}
+        <PanelCard
+          title="이 시점의 뉴스" glowColor={evGlow}
+          evidencePhase={evidencePhase} src="news"
+          interps={t.interps?.news}
+          onPickInterp={(i) => actions.toggleEvidence('news', i)}
+          selectedEvidences={selectedEvidences}
+          onToggle={() => actions.toggleEvidence('news')}
+          onHelp={() => help === newsHelpKey ? actions.closeHelp() : actions.openHelp(newsHelpKey)}
+          helpKey={newsHelpKey} help={help} actions={actions}
+          prefMult={charMult.news} charHue={charHue}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {t.news.map((n, i) => (
+              <div key={i} style={{ borderLeft: '2px solid #e4e7ec', paddingLeft: '11px' }}>
+                <div style={{ fontSize: '13.5px', fontWeight: 600, lineHeight: 1.5, wordBreak: 'keep-all' }}>{n.t}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: '#7a8395', marginTop: '3px' }}>{n.src}</div>
+              </div>
+            ))}
+          </div>
+        </PanelCard>
 
-      {/* Community */}
-      <PanelCard
-        title="커뮤니티" glowColor={evGlow}
-        evidencePhase={evidencePhase} src="community"
-        interps={t.interps?.community}
-        onPickInterp={(i) => actions.toggleEvidence('community', i)}
-        selectedEvidences={selectedEvidences}
-        onToggle={() => actions.toggleEvidence('community')}
-        onHelp={() => help === 'herd' ? actions.closeHelp() : actions.openHelp('herd')}
-        helpKey="herd" help={help} actions={actions}
-        prefMult={charMult.community} charHue={charHue}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
-          {t.community.map((c, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e8ebef', flexShrink: 0, marginTop: '1px' }} />
-              <div style={{ fontSize: '13px', color: '#3d4858', lineHeight: 1.5, wordBreak: 'keep-all' }}>{c.t}</div>
-            </div>
-          ))}
-        </div>
-      </PanelCard>
+        {/* Community */}
+        <PanelCard
+          title="커뮤니티" glowColor={evGlow}
+          evidencePhase={evidencePhase} src="community"
+          interps={t.interps?.community}
+          onPickInterp={(i) => actions.toggleEvidence('community', i)}
+          selectedEvidences={selectedEvidences}
+          onToggle={() => actions.toggleEvidence('community')}
+          onHelp={() => help === 'herd' ? actions.closeHelp() : actions.openHelp('herd')}
+          helpKey="herd" help={help} actions={actions}
+          prefMult={charMult.community} charHue={charHue}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+            {t.community.map((c, i) => (
+              <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e8ebef', flexShrink: 0, marginTop: '1px' }} />
+                <div style={{ fontSize: '13px', color: '#3d4858', lineHeight: 1.5, wordBreak: 'keep-all' }}>{c.t}</div>
+              </div>
+            ))}
+          </div>
+        </PanelCard>
+      </div>
 
       <ChartModal
         open={chartExpanded}
