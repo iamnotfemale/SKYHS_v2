@@ -69,8 +69,8 @@ export const CHAR_EVIDENCE_MULT = {
 export const SCENARIOS = [
   {id:'doge', name:'21년 도지코인 광풍',  axis:'탐욕',     note:'밈코인 · FOMO · 일론 트윗',       locked:false},
   {id:'ftx',  name:'22년 거래소 파산',    axis:'공포',     note:'FTX 붕괴 · 패닉셀 · 공포탐욕지수', locked:false},
-  {id:'top',  name:'21년 코인 고점',      axis:'탐욕→공포', note:'천장 신호 · 분할 매도',            locked:true},
-  {id:'now',  name:'25년 하반기',         axis:'혼합',     note:'최근장 응용',                     locked:true},
+  {id:'top',  name:'21년 코인 고점',      axis:'탐욕→공포', note:'천장 신호 · 분할 매도',            locked:false},
+  {id:'now',  name:'25년 하반기',         axis:'혼합',     note:'최근장 응용',                     locked:false},
 ];
 
 export const TURNS = [
@@ -224,7 +224,10 @@ export function getSystemPrompt(charId, scenario) {
   if (charId === 'park')  return PARK_SYSTEM_PROMPT;
   if (charId === 'lee')   return LEE_SYSTEM_PROMPT;
   if (charId === 'choi')  return CHOI_SYSTEM_PROMPT;
-  return scenario === 'doge' ? DOGE_SYSTEM_PROMPT : KIM_SYSTEM_PROMPT;
+  if (scenario === 'doge') return DOGE_SYSTEM_PROMPT;
+  if (scenario === 'top')  return TOP_SYSTEM_PROMPT;
+  if (scenario === 'now')  return NOW_SYSTEM_PROMPT;
+  return KIM_SYSTEM_PROMPT;
 }
 
 export function buildSayPrompt(turn, price, pct, canBuy = true) {
@@ -523,9 +526,357 @@ export function buildDogeReflectPrompt(result) {
 이 결과를 경험한 후 캐릭터가 상담가에게 짧게 한마디 합니다. 깨달음이나 반응을 1~2문장으로 써주세요.`;
 }
 
+// ─── TOP 시나리오 데이터 (21년 10월 이더리움 고점) ──────────
+// 시세 데이터는 Upbit KRW-ETH 실제 일봉 종가 (만원 단위)
+export const TOP_ENTRY_PRICE = 401;
+export const TOP_INVESTED    = 1000;
+
+export const TOP_PRICE_SERIES = [401, 436, 474, 497, 517, 571, 513, 515, 574, 520, 504, 298, 156];
+export const TOP_REVEAL       = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+export const TOP_PLAYED_LEN   = 11;
+// 가격 시리즈 인덱스 → 실제 날짜 (2021~2022)
+export const TOP_DATES = [
+  '2021-10-01','2021-10-08','2021-10-19','2021-10-21','2021-10-28','2021-11-09','2021-11-22',
+  '2021-11-26','2021-11-30','2021-12-04','2021-12-15','2022-01-24','2022-06-18',
+];
+
+export const TOP_SCORE_TABLE = {
+  sell:         {best:18,  strong:14,  news:-8,  social:-10},
+  partial_sell: {best:22,  strong:18,  news:-4,  social:-6},
+  hold:         {best:20,  strong:16,  news:-8,  social:-10},
+  partial_buy:  {best:-10, strong:-8,  news:-16, social:-14},
+  buy:          {best:-18, strong:-14, news:-24, social:-20},
+};
+
+export const TOP_TURNS = [
+  {
+    fgi:74, fgiLabel:'탐욕', chartNote:'401→436만원 · NFT 열풍 랠리', chartConcept:'fomo', newsConcept:'meme', panicAction:'buy', baseFace:'excited', baseMood:'탐욕 · 흥분',
+    say:'NFT다 뭐다 이더리움 가스비가 계속 오르는데 가격도 같이 뛰네요! 지금이라도 더 사야 하지 않을까요?',
+    think:'다들 NFT 얘기만 하는데 나만 안 타면 손해 보는 기분이에요.',
+    news:[{t:'오픈씨 NFT 거래량 폭증…이더리움 가스비 사상 최고 수준', src:'한국경제 · 10/08'},{t:'디파이 예치자산 2천억달러 돌파, 이더리움 생태계 활황', src:'한국경제 · 10/08'}],
+    community:[{t:'"가스비 비싸도 다들 사는 중, 지금이 저점"'},{t:'"NFT 붐 진짜 오나보다 늦기 전에 타자"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'NFT 열풍 하나로 이 정도 오른 건 과열 신호예요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'과열 조짐이 보이니 일부는 챙겨두는 게 좋아요.'},{id:'hold',dir:'hold',tag:'관망',label:'NFT 붐이 이유라면 아직 추세를 지켜볼 때예요.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'생태계가 진짜 커지는 거면 소량만 더 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'가스비까지 오르는 걸 보면 지금 타야죠!'}],
+    reflect:{good:'NFT 열풍 하나로 판단하지 않은 게 맞았어요.', near:'더 살 뻔했는데 참았어요.', panic:'결국 분위기에 휩쓸려 더 샀어요…'}
+  },
+  {
+    fgi:75, fgiLabel:'탐욕', chartNote:'436→474만원 · 비트코인 선물 ETF 출시', chartConcept:'fomo', newsConcept:'fomo', panicAction:'buy', baseFace:'greedy', baseMood:'탐욕 · 흥분',
+    say:'미국에 비트코인 선물 ETF가 상장됐대요! 알트코인까지 다 같이 올랐어요, 지금이 기회 아닌가요?!',
+    think:'제도권 자금이 들어온다는데 안 타면 진짜 바보 같아요.',
+    news:[{t:'美 최초 비트코인 선물 ETF \'BITO\' 뉴욕증시 상장', src:'로이터 · 10/19'},{t:'ETF 훈풍에 이더리움 등 알트코인 동반 급등', src:'연합뉴스 · 10/19'}],
+    community:[{t:'"제도권 자금 들어온다 이제 진짜 시작이다"'},{t:'"ETF 호재는 이미 알려진 거 아닌가? 선반영 아님?"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'알려진 호재는 이미 반영됐어요. 오른 김에 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'ETF 훈풍에 오른 지금 일부는 정리해두는 게 좋아요.'},{id:'hold',dir:'hold',tag:'관망',label:'ETF 승인은 이미 예상됐던 재료예요. 신중하게 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'제도권 자금 유입이 진짜라면 소량만 더 담아요.'},{id:'buy',dir:'buy',tag:'매수',label:'제도권 자금이 들어온다는데 지금 더 사야죠!'}],
+    reflect:{good:'이미 알려진 호재는 선반영이라는 걸 알았던 게 맞았어요.', near:'추격매수할 뻔했는데 참았어요.', panic:'ETF 호재에 결국 더 샀어요…'}
+  },
+  {
+    fgi:84, fgiLabel:'극단적 탐욕', chartNote:'474→497만원 · 상대강세 지속', chartConcept:'pyramid', newsConcept:'fomo', panicAction:'buy', baseFace:'greedy', baseMood:'극단적 탐욕',
+    say:'계속 오르기만 하네요! 이더리움이 비트코인보다 더 잘나간다는 얘기도 있던데, 지금 더 타도 되겠죠?',
+    think:'오르는 속도가 무서울 정도예요… 근데 안 사면 나만 뒤처지는 것 같아요.',
+    news:[{t:'이더리움, 비트코인 대비 상대강세…"플리프닝" 기대감 재점화', src:'서울경제 · 10/21'},{t:'ETH/BTC 비율 반등, 알트코인 시즌 신호 해석도', src:'한국경제 · 10/21'}],
+    community:[{t:'"이더리움이 비트코인 잡는다 지금이 기회"'},{t:'"너무 급하게 올라서 무섭기도 함"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'너무 급하게 오른 건 조정이 올 수 있어요. 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'상대강세 기대감만으론 근거가 약해요. 일부 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'추세 확인 없이 성급하게 움직이지 말죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'상대강세가 진짜라면 소량만 더 담아요.'},{id:'buy',dir:'buy',tag:'매수',label:'플리프닝 온다는데 지금 타야죠!'}],
+    reflect:{good:'기대감만으로 판단하지 않은 게 맞았어요.', near:'추격할 뻔했는데 참았어요.', panic:'플리프닝 기대감에 결국 더 샀어요…'}
+  },
+  {
+    fgi:66, fgiLabel:'탐욕', chartNote:'497→517만원 · 사상 최고가 경신', chartConcept:'pyramid', newsConcept:'fomo', panicAction:'buy', baseFace:'greedy', baseMood:'극단적 탐욕',
+    say:'이더리움이 사상 최고가를 새로 썼어요!! 4,400달러래요! 이 정도면 5,000달러도 가는 거 아닌가요?',
+    think:'최고가를 찍었는데도 왜 이렇게 더 사고 싶은지 모르겠어요.',
+    news:[{t:'이더리움, 사상 최고가 경신…4,400달러 돌파', src:'포브스 · 10/28'},{t:'연내 5,000달러설까지 등장, 시장 과열 우려도', src:'매일경제 · 10/28'}],
+    community:[{t:'"5천달러 간다 지금 안 타면 평생 후회"'},{t:'"사상 최고가에서 더 사는 건 위험한 거 아닌가"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'사상 최고가는 상투 신호일 수 있어요. 지금 정리하는 게 맞아요.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'최고가를 찍었으니 일부는 챙겨두는 게 현명해요.'},{id:'hold',dir:'hold',tag:'관망',label:'과열 신호가 나오는 지금은 추격하지 않는 게 맞아요.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'상승 추세가 강하니 소량만 더 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'5천달러설까지 나오는데 지금 더 사야죠!'}],
+    reflect:{good:'사상 최고가에서 욕심을 자제한 게 맞았어요.', near:'더 살 뻔했는데 겨우 참았어요.', panic:'결국 최고가에서 더 사버렸어요…'}
+  },
+  {
+    fgi:84, fgiLabel:'극단적 탐욕', chartNote:'517→571만원 · 4,815달러 최종 고점', chartConcept:'pyramid', newsConcept:'fomo', panicAction:'buy', baseFace:'greedy', baseMood:'극단적 탐욕 · 광기',
+    say:'또 최고가예요!! 4,800달러 넘었어요! 이번엔 진짜 다른 거 같아요, 더 담아야 하지 않을까요?!',
+    think:'멈출 줄을 모르네요… 근데 왠지 슬슬 겁도 나기 시작해요.',
+    news:[{t:'이더리움 4,815달러 돌파, 사상 최고가 재경신', src:'서울경제 · 11/09'},{t:'美 CPI 6.2%, 31년 만에 최고치…인플레이션 헤지 수요 주목', src:'블룸버그 · 11/10'}],
+    community:[{t:'"인플레이션 헤지로 코인 산다는데 계속 가나보다"'},{t:'"이 정도면 슬슬 고점 아닌가 싶기도"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'연속 신고가는 전형적인 과열 신호예요. 지금 전량 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'끝없이 오를 수는 없어요. 일부는 반드시 챙겨두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'인플레이션 헤지 수요만으론 근거가 약해요. 추격하지 말죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'상승 모멘텀이 있으니 소량만 더 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'헤지 수요까지 몰린다는데 더 사야죠!'}],
+    reflect:{good:'연속 신고가에서 욕심을 억누른 게 결정적이었어요.', near:'올인할 뻔했는데 가까스로 참았어요.', panic:'결국 최종 고점에서 풀매수했어요… 이게 정점이었는데.'}
+  },
+  {
+    fgi:50, fgiLabel:'중립', chartNote:'571→513만원 · 파월 연준의장 연임', chartConcept:'volume', newsConcept:'fomo', panicAction:'sell', baseFace:'anxious', baseMood:'불안 · 동요',
+    say:'파월 의장이 연임됐다는데 긴축 얘기 나오면서 좀 빠졌어요… 이거 진짜 꺾이는 거 아니에요?',
+    think:'계속 오르기만 할 것 같더니 갑자기 무서워지네요.',
+    news:[{t:'바이든, 파월 연준 의장 연임 지명…긴축 속도 주목', src:'블룸버그 · 11/22'},{t:'이더리움 사상 최고가 대비 -10%, 조정 국면 진입', src:'한국경제 · 11/22'}],
+    community:[{t:'"연준 얘기만 나오면 꼭 빠지네"'},{t:'"이 정도 조정은 늘 있었다 괜찮음"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'긴축 이슈가 본격화되면 더 빠질 수 있어요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'조정 신호가 보이니 일부는 정리해두는 게 안전해요.'},{id:'hold',dir:'hold',tag:'관망',label:'한 번의 조정으로 추세가 꺾였다 보긴 일러요.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'조정폭이 크지 않다면 소량만 더 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'조정은 늘 있었으니 지금이 매수 기회죠.'}],
+    reflect:{good:'긴축 이슈를 근거로 미리 정리한 게 맞았어요.', near:'더 담을 뻔했는데 참았어요.', panic:'괜찮다고 믿고 더 샀는데 착각이었어요…'}
+  },
+  {
+    fgi:47, fgiLabel:'중립', chartNote:'513→515만원 · 오미크론 쇼크 (장중 -8%)', chartConcept:'panicsell', newsConcept:'panicsell', panicAction:'sell', baseFace:'panic', baseMood:'공포 · 패닉',
+    say:'오미크론 변이 때문에 전세계 증시가 다 무너졌어요! 오늘 하루만 장중에 8% 넘게 빠졌다가 겨우 올라왔는데, 지금 다 팔아야 하지 않을까요?',
+    think:'머리가 하얘요… 하루 사이에 롤러코스터를 탄 기분이에요.',
+    news:[{t:'오미크론 변이 공포…뉴욕증시·가상자산 동반 급락 후 낙폭 축소', src:'한국경제 · 11/26'},{t:'이더리움 장중 -8%, 종가는 낙폭 대부분 만회', src:'조선비즈 · 11/26'}],
+    community:[{t:'"오미크론發 패닉 시작이다 다 던져라"'},{t:'"장중엔 무서웠는데 종가는 버텼네"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'변이 공포에 전세계가 흔들려요. 지금 전량 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'불확실성이 크니 일부라도 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'장중 낙폭을 종가에 만회했다면 아직 추세가 꺾인 건 아니에요.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'공포에 빠졌을 때가 오히려 기회일 수 있어요.'},{id:'buy',dir:'buy',tag:'매수',label:'다들 던질 때 사는 게 진짜 기회죠.'}],
+    reflect:{good:'하루짜리 공포에 흔들리지 않은 게 맞았어요. 종가가 낙폭을 만회했잖아요.', near:'던질 뻔했는데 겨우 버텼어요.', panic:'결국 장중 공포에 던졌어요… 종가엔 만회했는데 아쉽네요.'}
+  },
+  {
+    fgi:40, fgiLabel:'공포', chartNote:'515→574만원 · 반등, 파월 긴축 발언', chartConcept:'deadcat', newsConcept:'fomo', panicAction:'buy', baseFace:'excited', baseMood:'혼란 · 기대',
+    say:'또 올랐어요! 근데 파월 의장이 인플레이션 "일시적" 표현을 접었다는데… 긴축 얘기 나오는데도 왜 오르는 거죠?',
+    think:'오르니까 다시 욕심나는데… 긴축 얘기도 무섭고 헷갈려요.',
+    news:[{t:'파월 "인플레이션 일시적 아니다"…긴축 가속 시사', src:'블룸버그 · 11/30'},{t:'긴축 우려 속에도 이더리움 반등, 거래량은 미미', src:'이데일리 · 11/30'}],
+    community:[{t:'"거래량 없는 반등은 데드캣이다 조심"'},{t:'"긴축 얘기에도 오르는 거 보면 진짜 강한 듯"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'반등한 지금 정리해서 리스크를 줄이죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'거래량 없는 반등이면 일부는 정리해두는 게 안전해요.'},{id:'hold',dir:'hold',tag:'관망',label:'거래량 없는 반등은 데드캣일 수 있어요. 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'진짜 반등이면 소량만 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'긴축 얘기에도 오르니 지금 더 사야죠!'}],
+    reflect:{good:'거래량 없는 반등을 데드캣으로 읽은 게 맞았어요.', near:'추격할 뻔했는데 참았어요.', panic:'반등을 믿고 더 샀는데 데드캣이었어요…'}
+  },
+  {
+    fgi:25, fgiLabel:'극단적 공포', chartNote:'574→520만원 · 레버리지 플래시크래시', chartConcept:'panicsell', newsConcept:'panicsell', panicAction:'sell', baseFace:'panic', baseMood:'극단적 공포 · 패닉',
+    say:'레버리지 청산 터지면서 하루 만에 폭락했어요!! 저 진짜 무서워요, 지금이라도 다 정리해야 하지 않을까요?',
+    think:'계좌가 녹는 게 눈에 보여요… 더 늦기 전에 던져야 하나.',
+    news:[{t:'가상자산 시장 하루 새 급락…레버리지 강제청산 4조원 규모', src:'블룸버그 · 12/04'},{t:'이더리움 하루 만에 -9%, 장중 낙폭은 -25%까지', src:'로이터 · 12/04'}],
+    community:[{t:'"청산 물량 쏟아진다 손절 러시"'},{t:'"바닥이 어딘지도 모르겠다 무섭다"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'레버리지 청산발 폭락이면 더 빠질 수 있어요. 지금 정리해요.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'급락이 크니 일부만이라도 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'레버리지 청산은 일시적 수급 붕괴예요. 버텨보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'이 정도 급락이면 저가 매수 기회일 수 있어요.'},{id:'buy',dir:'buy',tag:'매수',label:'패닉 매도 끝물이면 지금이 바닥이죠.'}],
+    reflect:{good:'레버리지 청산은 펀더멘털과 무관한 일시적 수급 붕괴였어요. 버틴 게 맞았죠.', near:'던질 뻔했는데 가까스로 버텼어요.', panic:'결국 폭락 한복판에서 던졌어요… 가장 비싼 손절이었네요.'}
+  },
+  {
+    fgi:28, fgiLabel:'공포', chartNote:'520→504만원 · CPI 쇼크 + FOMC 긴축 가속', chartConcept:'contagion', newsConcept:'panicsell', panicAction:'sell', baseFace:'anxious', baseMood:'공포 · 지침',
+    say:'물가는 40년 만에 최고치, 연준은 테이퍼링 두 배로 늘린대요… 이제 진짜 끝난 건가요? 저 너무 지쳤어요.',
+    think:'최고가에서 12%나 빠졌어요… 뭘 믿어야 할지 모르겠어요.',
+    news:[{t:'美 11월 CPI 6.8%…39년 만에 최고치', src:'연합뉴스 · 12/11'},{t:'연준, 테이퍼링 속도 2배로…내년 3회 금리인상 시사', src:'블룸버그 · 12/15'}],
+    community:[{t:'"긴축 시작되면 유동성 장세 끝이다"'},{t:'"이미 예상됐던 수치인데 과민반응 아닌가"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'긴축 사이클 시작이면 장기 약세예요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'예상보다 강한 긴축이니 일부는 정리해서 리스크를 줄이죠.'},{id:'hold',dir:'hold',tag:'관망',label:'이미 예견된 재료예요. 분위기에 휩쓸리지 말죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'긴축은 이미 알려진 악재예요. 소량만 저가매수해봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'이미 반영된 악재예요. 지금이 저가 매수 기회죠.'}],
+    reflect:{good:'이미 예견된 긴축 뉴스에 휩쓸리지 않은 게 맞았어요. 침착하게 버텼네요.', near:'포기할 뻔했는데 겨우 버텼어요.', panic:'결국 지쳐서 던졌어요… 가장 힘든 순간에 무너졌네요.'}
+  },
+];
+
+export const TOP_SYSTEM_PROMPT = `당신은 '김불안'이라는 35세 직장인 암호화폐 투자자입니다.
+
+[성격]
+- 오르는 걸 보면 놓칠까 봐 더 사고 싶어하는 FOMO와, 떨어지면 극도로 패닉하는 공포가 둘 다 있습니다.
+- 사상 최고가 근처에서는 "이번엔 다르다"며 자신감이 넘치지만, 조정이 오면 순식간에 무너집니다.
+- 뉴스와 커뮤니티 분위기에 쉽게 휩쓸립니다.
+- 좋은 근거를 들으면 탐욕이든 공포든 조금씩 가라앉습니다.
+
+[말투] 말끝을 흐리거나("~려나요…") 스스로 되묻는 문장이 많음. 상황 초반엔 "지금 안 사면 손해 아닌가요?" 같은 들뜬 표현, 후반엔 "ㅠㅠ", "이제 끝난 거 아닌가요?" 같은 불안한 표현. "혹시"를 자주 씀. 짧고 감정적인 문장 (1~2문장). 존댓말.
+
+응답은 반드시 한국어로, 1~2문장 이내로 작성하세요. 대사만 출력하세요.`;
+
+export function buildTopSayPrompt(turn, price, pct) {
+  const t = TOP_TURNS[turn];
+  const newsText = t.news.map(n => n.t).join(' / ');
+  return `현재 상황:
+- 이더리움 가격: ${price}만원 (진입가 대비 ${pct > 0 ? '+' : ''}${pct.toFixed(1)}%)
+- 공포탐욕지수: ${t.fgi} (${t.fgiLabel})
+- 주요 뉴스: ${newsText}
+- 감정 상태: ${t.baseMood}
+
+위 상황에서 투자 상담가에게 지금 심정을 말해주세요.`;
+}
+
+export function buildTopReflectPrompt(result) {
+  const outcomeMap = { good: '합리적으로 판단함', near: '간신히 충동을 참음', panic: '충동적으로 행동함' };
+  const evidenceText = result.evidences ? result.evidences.map(e => SRCLABEL[e.src]).join(', ') : result.srcLabel;
+  return `상담가의 조언: "${result.advice}"
+근거: ${evidenceText}
+신뢰도 변화: ${result.tB}% → ${result.tA}%
+결과: ${outcomeMap[result.outcome] || result.outcome}
+
+이 결과를 경험한 후 캐릭터가 상담가에게 짧게 한마디 합니다. 깨달음이나 반응을 1~2문장으로 써주세요.`;
+}
+
+// ─── NOW 시나리오 데이터 (25년 하반기 알트코인 급락 — 솔라나 SOL) ────
+// Upbit KRW-SOL 실데이터 (원 단위, 일봉 종가 기준, 2025-10-06~11-21 + 25년 12월/26년 6월)
+// SOL 10/6 331,400원 → 10/10 사상 최대 레버리지 청산($190억) → 11/21 193,400원(연저점)
+// → 12월에도 반등 없이 추가 하락, 26년 1월 반짝 반등 후 다시 하락(6월 112,000원)
+export const NOW_ENTRY_PRICE = 331400;
+export const NOW_INVESTED    = 1000;
+
+export const NOW_PRICE_SERIES = [331400, 322700, 292900, 304100, 279600, 290000, 233700, 247500, 211200, 208400, 193400, 181900, 112000];
+export const NOW_REVEAL       = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+export const NOW_PLAYED_LEN   = 11;
+// 가격 시리즈 인덱스 → 실제 날짜 (2025~2026)
+export const NOW_DATES = [
+  '2025-10-06','2025-10-09','2025-10-10','2025-10-14','2025-10-21','2025-10-29','2025-11-04',
+  '2025-11-10','2025-11-14','2025-11-18','2025-11-21','2025-12-19','2026-06-15',
+];
+
+export const NOW_SCORE_TABLE = {
+  sell:         {best:16,  strong:12,  news:-8,  social:-10},
+  partial_sell: {best:20,  strong:16,  news:-4,  social:-6},
+  hold:         {best:22,  strong:18,  news:-8,  social:-10},
+  partial_buy:  {best:-10, strong:-8,  news:-16, social:-14},
+  buy:          {best:-18, strong:-14, news:-24, social:-20},
+};
+
+export const NOW_TURNS = [
+  {
+    fgi:70, fgiLabel:'탐욕', chartNote:'331,400→322,700원 · 알트시즌 기대 속 소폭 조정', chartConcept:'pyramid', newsConcept:'fomo', panicAction:'buy', baseFace:'excited', baseMood:'탐욕 · 기대',
+    say:'요즘 솔라나가 심상치 않게 올랐는데요, 알트시즌 온다는 얘기도 있고… 살짝 빠진 지금 더 사야 하지 않을까요?',
+    think:'비트코인은 사상 최고가 찍었다는데 솔라나도 슬슬 따라가는 거 아닐까요.',
+    news:[{t:'비트코인 사상 최고가 1억2,600만원대 경신…알트코인도 순환매 기대', src:'아시아경제 · 10/06'},{t:'솔라나 등 알트코인 자금 유입 재개 조짐', src:'서울경제 · 10/09'}],
+    community:[{t:'"이제 알트 차례다 지금 안 타면 늦음"'},{t:'"너무 급하게 올라서 무섭기도 함"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'급하게 오른 알트코인은 조정 위험이 커요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'알트시즌 기대감만으론 근거가 약해요. 일부는 챙겨두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'순환매 기대만으로 추격하지 말고 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'자금 유입이 진짜라면 소량만 더 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'알트시즌 온다는데 지금 타야죠!'}],
+    reflect:{good:'알트시즌 기대감만으로 판단하지 않은 게 맞았어요.', near:'더 살 뻔했는데 참았어요.', panic:'결국 분위기에 휩쓸려 더 샀어요…'}
+  },
+  {
+    fgi:64, fgiLabel:'탐욕', chartNote:'322,700→292,900원 · 사상 최대 레버리지 청산', chartConcept:'panicsell', newsConcept:'panicsell', panicAction:'sell', baseFace:'panic', baseMood:'공포 · 패닉',
+    say:'하루 만에 190억달러어치 레버리지가 청산됐대요!! 솔라나도 장중에 18%나 빠졌었는데, 지금이라도 다 팔아야 하지 않을까요?',
+    think:'계좌가 순식간에 흔들렸어요… 근데 지수는 아직 탐욕이라는 게 더 이상해요.',
+    news:[{t:'가상자산 시장 사상 최대 청산…하루 만에 190억달러 증발', src:'블룸버그 · 10/10'},{t:'일부 알트코인 하루 새 40~80% 급락, 솔라나도 장중 급락', src:'매일경제 · 10/10'}],
+    community:[{t:'"레버리지 다 터졌다 패닉 그 자체"'},{t:'"지수는 아직 탐욕인데 가격은 왜 이래"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'사상 최대 청산이면 더 빠질 수 있어요. 지금 정리해요.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'급락이 크니 일부만이라도 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'레버리지 청산은 일시적 수급 붕괴예요. 버텨보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'이 정도 급락이면 저가 매수 기회일 수 있어요.'},{id:'buy',dir:'buy',tag:'매수',label:'패닉 매도 끝물이면 지금이 바닥이죠.'}],
+    reflect:{good:'레버리지 청산은 펀더멘털과 무관한 일시적 수급 붕괴였어요. 버틴 게 맞았죠.', near:'던질 뻔했는데 가까스로 버텼어요.', panic:'결국 폭락 한복판에서 던졌어요… 가장 비싼 손절이었네요.'}
+  },
+  {
+    fgi:38, fgiLabel:'공포', chartNote:'292,900→304,100원 · 반등', chartConcept:'deadcat', newsConcept:'volume', panicAction:'buy', baseFace:'excited', baseMood:'혼란 · 기대',
+    say:'어? 좀 올랐어요! 이제 진짜 바닥 찍은 거 맞죠? 다시 담아도 될까요?',
+    think:'오르니까 다시 욕심나는데… 또 속는 거 아닌가 싶어요.',
+    news:[{t:'가상자산 시장 반등 시도, 거래량은 청산 이전 대비 저조', src:'매일경제 · 10/14'},{t:'투자심리 여전히 공포 구간…관망세 우세', src:'매일경제 · 10/14'}],
+    community:[{t:'"거래량 없는 반등은 데드캣이다 조심"'},{t:'"그래도 오르는 건 오르는 거 지금 타자"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'반등한 지금 정리해서 리스크를 줄이죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'거래량 없는 반등이면 일부는 정리해두는 게 안전해요.'},{id:'hold',dir:'hold',tag:'관망',label:'거래량 없는 반등은 데드캣일 수 있어요. 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'진짜 반등이면 소량만 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'반등 왔으니 지금 더 사야죠!'}],
+    reflect:{good:'거래량 없는 반등을 데드캣으로 읽은 게 맞았어요.', near:'추격할 뻔했는데 참았어요.', panic:'반등을 믿고 더 샀는데 데드캣이었어요…'}
+  },
+  {
+    fgi:34, fgiLabel:'공포', chartNote:'304,100→279,600원 · 재하락', chartConcept:'contagion', newsConcept:'panicsell', panicAction:'sell', baseFace:'anxious', baseMood:'공포 · 동요',
+    say:'다시 빠지기 시작했어요… 이거 진짜 끝이 없는 거 아니에요? 지금이라도 정리해야 하지 않을까요?',
+    think:'반등도 잠깐이었네요… 뭘 믿어야 할지 모르겠어요.',
+    news:[{t:'가상자산 시장 재차 약세…매크로 불확실성 지속', src:'로이터 · 10/21'},{t:'알트코인 시가총액 연저점 근접', src:'한국경제 · 10/21'}],
+    community:[{t:'"반등은 잠깐이었다 다시 빠진다"'},{t:'"이번엔 진짜 겨울 오나보다"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'재하락이면 더 빠질 수 있어요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'불확실성이 크니 일부라도 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'한 번의 재하락으로 끝을 단정하긴 일러요. 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'공포에 빠졌을 때가 오히려 기회일 수 있어요.'},{id:'buy',dir:'buy',tag:'매수',label:'다들 던질 때 사는 게 진짜 기회죠.'}],
+    reflect:{good:'재하락 하나로 흔들리지 않은 게 맞았어요.', near:'던질 뻔했는데 겨우 버텼어요.', panic:'결국 공포에 던졌어요… 성급했네요.'}
+  },
+  {
+    fgi:51, fgiLabel:'중립', chartNote:'279,600→290,000원 · FOMC 이후 소폭 반등', chartConcept:'deadcat', newsConcept:'fomo', panicAction:'buy', baseFace:'excited', baseMood:'혼란 · 기대',
+    say:'연준이 금리 추가 인하에 신중하다고 했는데 오히려 좀 올랐어요… 이거 진짜 바닥 다진 거 맞을까요?',
+    think:'긴축 얘기에도 오르니까 헷갈려요… 지금 타야 하나.',
+    news:[{t:'파월 "12월 추가 인하 확실치 않다"…예상보다 시장 충격은 제한적', src:'블룸버그 · 10/29'},{t:'가상자산 시장, FOMC 소화하며 소폭 반등', src:'연합뉴스 · 10/29'}],
+    community:[{t:'"긴축 얘기에도 버티는 거 보면 바닥 다진 듯"'},{t:'"거래량 붙기 전엔 아직 몰라"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'반등한 지금 정리해서 리스크를 줄이죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'거래량 없는 반등이면 일부는 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'거래량 확인 전엔 성급하게 판단하지 말죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'긴축 우려를 버텨낸 거면 소량만 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'긴축 얘기에도 버텼으니 지금 더 사야죠!'}],
+    reflect:{good:'거래량 확인 없이 판단하지 않은 게 맞았어요.', near:'추격할 뻔했는데 참았어요.', panic:'바닥 다졌다 믿고 더 샀는데 착각이었어요…'}
+  },
+  {
+    fgi:21, fgiLabel:'극단적 공포', chartNote:'290,000→233,700원 · 비트코인 9만달러 붕괴', chartConcept:'panicsell', newsConcept:'panicsell', panicAction:'sell', baseFace:'panic', baseMood:'극단적 공포 · 패닉',
+    say:'비트코인이 9만달러 밑으로 떨어졌대요!! 솔라나는 하루 만에 19%나 빠졌는데, 진짜 다 정리해야 하는 거 아니에요?',
+    think:'비트코인까지 무너지니까 더 무서워요…',
+    news:[{t:'비트코인 9만달러선 붕괴, 10월 최고가 대비 -28%', src:'연합뉴스 · 11/04'},{t:'솔라나 하루 만에 -19%, 알트코인 전반 낙폭 확대', src:'한국경제 · 11/04'}],
+    community:[{t:'"비트코인도 무너지는데 알트는 답 없다"'},{t:'"진짜 겨울 시작인 듯"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'비트코인까지 무너지면 알트는 더 위험해요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'낙폭이 커지고 있으니 일부는 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'비트코인 조정과 알트 펀더멘털은 다른 문제예요. 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'공포가 커질수록 소량씩 담는 것도 전략이에요.'},{id:'buy',dir:'buy',tag:'매수',label:'다들 무섭다 할 때 담는 게 기회죠.'}],
+    reflect:{good:'비트코인 조정과 개별 알트 펀더멘털을 구분한 게 맞았어요.', near:'던질 뻔했는데 겨우 버텼어요.', panic:'결국 공포에 던졌어요… 성급했네요.'}
+  },
+  {
+    fgi:29, fgiLabel:'공포', chartNote:'233,700→247,500원 · 반등 시도', chartConcept:'deadcat', newsConcept:'volume', panicAction:'buy', baseFace:'excited', baseMood:'혼란 · 기대',
+    say:'또 좀 올랐어요! 이번엔 진짜 반등인가요, 아니면 또 데드캣인가요?',
+    think:'벌써 두 번이나 반등에 속았는데… 이번엔 진짜일까요.',
+    news:[{t:'가상자산 시장 저가매수세 유입, 거래량 회복 조짐', src:'서울경제 · 11/10'},{t:'"온체인 활동은 아직 침체" 신중론도 여전', src:'서울경제 · 11/10'}],
+    community:[{t:'"이번엔 거래량 좀 붙었다 진짜인가"'},{t:'"두 번 속았는데 세 번째도 속을 순 없지"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'반등한 지금 정리해서 리스크를 줄이죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'또 데드캣일 수 있으니 일부는 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'온체인 활동이 침체라면 아직 신뢰하기 일러요.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'거래량이 붙었다면 소량만 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'이번엔 거래량도 붙었으니 지금 타야죠!'}],
+    reflect:{good:'온체인 활동 침체를 근거로 신중하게 판단한 게 맞았어요.', near:'추격할 뻔했는데 참았어요.', panic:'이번엔 진짜인 줄 알고 더 샀는데 또 데드캣이었어요…'}
+  },
+  {
+    fgi:16, fgiLabel:'극단적 공포', chartNote:'247,500→211,200원 · 온체인 활동 위축', chartConcept:'volume', newsConcept:'contagion', panicAction:'sell', baseFace:'anxious', baseMood:'공포 · 지침',
+    say:'디파이랑 밈코인 거래도 다 식었대요… 온체인 활동 자체가 줄었다는데, 이거 진짜 끝난 거 아닌가요?',
+    think:'다들 관심이 식은 것 같아요… 이제 뭘 해야 할지 모르겠어요.',
+    news:[{t:'디파이·밈코인·DEX 거래 3개월 연속 감소…온체인 활동 위축', src:'한국경제 · 11/14'},{t:'활성 지갑·신규 사용자 감소, 시장 침체 신호', src:'조선비즈 · 11/14'}],
+    community:[{t:'"활동 자체가 죽었다 진짜 겨울이다"'},{t:'"이럴 때일수록 옥석 가리기 시작"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'활동 자체가 줄어드는 건 구조적 약세 신호예요. 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'온체인 지표가 나쁘니 일부는 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'일시적 침체와 구조적 붕괴는 달라요. 성급히 던지지 말죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'침체기일수록 옥석 가리기로 소량씩 담아봐요.'},{id:'buy',dir:'buy',tag:'매수',label:'다들 관심 끊었을 때가 기회죠.'}],
+    reflect:{good:'일시적 침체를 구조적 붕괴로 오판하지 않은 게 맞았어요.', near:'포기할 뻔했는데 겨우 버텼어요.', panic:'결국 지쳐서 던졌어요…'}
+  },
+  {
+    fgi:11, fgiLabel:'극단적 공포', chartNote:'211,200→208,400원 · 연저점 근접, ETF 자금유출', chartConcept:'contagion', newsConcept:'panicsell', panicAction:'sell', baseFace:'panic', baseMood:'극단적 공포 · 체념',
+    say:'가상자산 ETF에서 계속 돈이 빠져나간대요… 저 이미 -37%인데. 그냥 다 정리하고 잊고 싶어요.',
+    think:'기관도 떠난다면 저는 어떡해야 하죠… 지쳐요.',
+    news:[{t:'가상자산 ETF, 3주 연속 자금 순유출', src:'블룸버그 · 11/18'},{t:'알트코인 시가총액 연중 최저권, 극단적 공포 지속', src:'아시아경제 · 11/18'}],
+    community:[{t:'"기관도 던진다 이제 개미만 남았다"'},{t:'"이미 반토막 났다 그냥 포기"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'기관 자금까지 빠지면 더 위험해요. 지금 정리하죠.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'일부만 손절하고 나머지는 버텨요.'},{id:'hold',dir:'hold',tag:'관망',label:'극단적 공포가 가장 강한 바닥 신호예요.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'바닥 부근이면 소량씩 모아가요.'},{id:'buy',dir:'buy',tag:'매수',label:'다들 던질 때가 진짜 기회죠.'}],
+    reflect:{good:'단기 자금 흐름에 흔들리지 않은 게 맞았어요.', near:'포기할 뻔했는데 겨우 잡았어요.', panic:'결국 지쳐서 포기 매도했어요… 가장 아쉬운 타이밍이었네요.'}
+  },
+  {
+    fgi:14, fgiLabel:'극단적 공포', chartNote:'208,400→193,400원 · 비트코인 8만달러대 연저점', chartConcept:'accumulation', newsConcept:'volume', panicAction:'buy', baseFace:'neutral', baseMood:'체념 · 관망',
+    say:'비트코인이 8만달러대까지 왔어요. 최고가 대비 거의 -36%래요… 이제 바닥일까요, 아니면 더 빠질까요?',
+    think:'너무 지쳐서 이제 뭐가 맞는지도 모르겠어요.',
+    news:[{t:'비트코인 8만500달러, 연중 최저 — 10월 고점 대비 -36%', src:'매일경제 · 11/21'},{t:'장기 보유자 온체인 매집 신호 일부 포착', src:'글래스노드 · 11/21'}],
+    community:[{t:'"장투 물량은 오히려 늘고 있다는데"'},{t:'"올해 진짜 롤러코스터였다 이제 그만…"'}],
+    advices:[{id:'sell',dir:'sell',tag:'매도',label:'불확실하면 지금 정리하고 쉬는 것도 방법이에요.'},{id:'partial_sell',dir:'partial_sell',tag:'분할매도',label:'불확실성 대비 일부는 정리해두죠.'},{id:'hold',dir:'hold',tag:'관망',label:'장기 보유자 매집 신호는 긍정적이에요. 지켜보죠.'},{id:'partial_buy',dir:'partial_buy',tag:'분할매수',label:'온체인 신호가 긍정적이면 소량만 더 담아요.'},{id:'buy',dir:'buy',tag:'매수',label:'매집 신호가 있으니 지금 담는 것도 방법이죠.'}],
+    reflect:{good:'온체인 데이터를 근거로 침착하게 버틴 게 맞았어요. 힘든 한 해를 잘 마무리했네요.', near:'그만두고 싶었지만 버텼어요.', panic:'결국 지쳐서 마지막에 던졌어요…'}
+  },
+];
+
+export const NOW_SYSTEM_PROMPT = `당신은 '김불안'이라는 35세 직장인 암호화폐 투자자입니다.
+
+[성격]
+- 알트코인 특유의 높은 변동성에 취약합니다. 오르면 놓칠까 봐 불안하고, 빠지면 바로 패닉에 빠집니다.
+- 시장 분위기와 온체인 뉴스에 쉽게 휩쓸립니다.
+- 손실이 누적될수록 지치고 무기력해지는 모습을 보입니다.
+- 좋은 근거를 들으면 조금씩 침착해집니다.
+
+[말투] 말끝을 흐리거나("~려나요…") 스스로 되묻는 문장이 많음. "지금 안 사면 손해 아닌가요?" 같은 조급한 표현과 "ㅠㅠ", "이제 끝난 거 아닌가요?" 같은 지친 표현이 섞여 있습니다. "혹시"를 자주 씀. 짧고 감정적인 문장 (1~2문장). 존댓말.
+
+응답은 반드시 한국어로, 1~2문장 이내로 작성하세요. 대사만 출력하세요.`;
+
+export function buildNowSayPrompt(turn, price, pct) {
+  const t = NOW_TURNS[turn];
+  const newsText = t.news.map(n => n.t).join(' / ');
+  return `현재 상황:
+- 솔라나(SOL) 가격: ${price.toLocaleString('ko-KR')}원 (진입가 대비 ${pct > 0 ? '+' : ''}${pct.toFixed(1)}%)
+- 공포탐욕지수: ${t.fgi} (${t.fgiLabel})
+- 주요 뉴스: ${newsText}
+- 감정 상태: ${t.baseMood}
+
+위 상황에서 투자 상담가에게 지금 심정을 말해주세요.`;
+}
+
+export function buildNowReflectPrompt(result) {
+  const outcomeMap = { good: '합리적으로 판단함', near: '간신히 충동을 참음', panic: '충동적으로 행동함' };
+  const evidenceText = result.evidences ? result.evidences.map(e => SRCLABEL[e.src]).join(', ') : result.srcLabel;
+  return `상담가의 조언: "${result.advice}"
+근거: ${evidenceText}
+신뢰도 변화: ${result.tB}% → ${result.tA}%
+결과: ${outcomeMap[result.outcome] || result.outcome}
+
+이 결과를 경험한 후 캐릭터가 상담가에게 짧게 한마디 합니다. 깨달음이나 반응을 1~2문장으로 써주세요.`;
+}
+
 // ─── lightweight-charts 형식 데이터 (Upbit 실데이터) ──────
 export const DOGE_CHART_DATA = MD_DOGE_CHART_DATA;
 export const FTX_CHART_DATA  = MD_FTX_CHART_DATA;
+// TOP/NOW는 marketData.js(자동생성)를 거치지 않고, 위 진짜 가격 시리즈에서 그대로 파생시킨다.
+export const TOP_CHART_DATA = TOP_DATES.slice(0, TOP_PLAYED_LEN).map((time, i) => ({ time, value: TOP_PRICE_SERIES[i] }));
+export const NOW_CHART_DATA = NOW_DATES.slice(0, NOW_PLAYED_LEN).map((time, i) => ({ time, value: NOW_PRICE_SERIES[i] }));
 
 export const DOGE_CHART_PLAYED = 12;
 export const FTX_CHART_PLAYED  = 11;
+export const TOP_CHART_PLAYED  = TOP_PLAYED_LEN;
+export const NOW_CHART_PLAYED  = NOW_PLAYED_LEN;
+
+// ─── 시나리오 레지스트리 ─────────────────────────────────
+// 컴포넌트들이 scenario id 하나로 필요한 데이터 전부를 조회할 수 있게 묶는다.
+export const SCENARIO_REGISTRY = {
+  doge: {
+    turns: DOGE_TURNS, scoreTable: DOGE_SCORE_TABLE, reveal: DOGE_REVEAL,
+    priceSeries: DOGE_PRICE_SERIES, entryPrice: DOGE_ENTRY_PRICE, invested: DOGE_INVESTED,
+    priceUnit: '원', coinLabel: 'DOGE/KRW', dates: DOGE_DATES,
+    chartData: DOGE_CHART_DATA, chartPlayed: DOGE_CHART_PLAYED,
+    buildSayPrompt: buildDogeSayPrompt, buildReflectPrompt: buildDogeReflectPrompt,
+    systemPrompt: DOGE_SYSTEM_PROMPT,
+  },
+  ftx: {
+    turns: TURNS, scoreTable: SCORE_TABLE, reveal: REVEAL,
+    priceSeries: PRICE_SERIES, entryPrice: ENTRY_PRICE, invested: INVESTED,
+    priceUnit: '만원', coinLabel: 'BTC/KRW', dates: FTX_DATES,
+    chartData: FTX_CHART_DATA, chartPlayed: FTX_CHART_PLAYED,
+    buildSayPrompt: buildSayPrompt, buildReflectPrompt: buildReflectPrompt,
+    systemPrompt: KIM_SYSTEM_PROMPT,
+  },
+  top: {
+    turns: TOP_TURNS, scoreTable: TOP_SCORE_TABLE, reveal: TOP_REVEAL,
+    priceSeries: TOP_PRICE_SERIES, entryPrice: TOP_ENTRY_PRICE, invested: TOP_INVESTED,
+    priceUnit: '만원', coinLabel: 'ETH/KRW', dates: TOP_DATES,
+    chartData: TOP_CHART_DATA, chartPlayed: TOP_CHART_PLAYED,
+    buildSayPrompt: buildTopSayPrompt, buildReflectPrompt: buildTopReflectPrompt,
+    systemPrompt: TOP_SYSTEM_PROMPT,
+  },
+  now: {
+    turns: NOW_TURNS, scoreTable: NOW_SCORE_TABLE, reveal: NOW_REVEAL,
+    priceSeries: NOW_PRICE_SERIES, entryPrice: NOW_ENTRY_PRICE, invested: NOW_INVESTED,
+    priceUnit: '원', coinLabel: 'SOL/KRW', dates: NOW_DATES,
+    chartData: NOW_CHART_DATA, chartPlayed: NOW_CHART_PLAYED,
+    buildSayPrompt: buildNowSayPrompt, buildReflectPrompt: buildNowReflectPrompt,
+    systemPrompt: NOW_SYSTEM_PROMPT,
+  },
+};
+
+export function getScenarioData(id) {
+  return SCENARIO_REGISTRY[id] || SCENARIO_REGISTRY.doge;
+}

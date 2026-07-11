@@ -1,24 +1,23 @@
 import { create } from 'zustand'
 import {
-  TURNS, SCORE_TABLE, SRCQ, SRCLABEL, REVEAL, PRICE_SERIES,
-  DOGE_TURNS, DOGE_SCORE_TABLE, DOGE_REVEAL, DOGE_PRICE_SERIES,
+  SRCQ, SRCLABEL,
   CHAR_EVIDENCE_MULT,
-  ENTRY_PRICE, INVESTED, DOGE_ENTRY_PRICE, DOGE_INVESTED,
   INTERP_BASE, INTERP_BAD_PENALTY, INTERP_CONTRA_FACTOR,
+  getScenarioData,
 } from '../data/gameContent'
 
 // ?demo=1 → 주사위 결정론 모드 (시연용)
 const DEMO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('demo')
 
 const scenarioData = (scenario) => {
-  const isDoge = scenario === 'doge'
+  const d = getScenarioData(scenario)
   return {
-    turns:       isDoge ? DOGE_TURNS        : TURNS,
-    scoreTable:  isDoge ? DOGE_SCORE_TABLE  : SCORE_TABLE,
-    reveal:      isDoge ? DOGE_REVEAL       : REVEAL,
-    priceSeries: isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES,
-    entry:       isDoge ? DOGE_ENTRY_PRICE  : ENTRY_PRICE,
-    invested:    isDoge ? DOGE_INVESTED     : INVESTED,
+    turns:       d.turns,
+    scoreTable:  d.scoreTable,
+    reveal:      d.reveal,
+    priceSeries: d.priceSeries,
+    entry:       d.entryPrice,
+    invested:    d.invested,
   }
 }
 

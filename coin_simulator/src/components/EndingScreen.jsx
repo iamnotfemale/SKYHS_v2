@@ -1,5 +1,10 @@
 import { useGameStore } from '../store/gameStore'
-import { DICT, CHARACTERS, SRCLABEL, PRICE_SERIES, ENTRY_PRICE, INVESTED, PLAYED_LEN, FTX_DATES } from '../data/gameContent'
+import {
+  DICT, CHARACTERS, SRCLABEL,
+  PRICE_SERIES, ENTRY_PRICE, INVESTED, PLAYED_LEN, FTX_DATES,
+  TOP_PRICE_SERIES, TOP_PLAYED_LEN,
+  NOW_PRICE_SERIES, NOW_PLAYED_LEN,
+} from '../data/gameContent'
 import { DOGE_FULL } from '../data/marketData'
 
 const DIR_LABEL = { sell:'전량 매도', partial_sell:'분할 매도', hold:'관망', partial_buy:'분할 매수', buy:'추격 매수' }
@@ -49,6 +54,20 @@ const FTX_END_IDX   = 12   // 11/22
 const FTX_EVENT_CLOSE = PRICE_SERIES[FTX_EVENT_IDX]
 const FTX_END_CLOSE   = PRICE_SERIES[FTX_END_IDX]
 const FTX_DROP = Math.round((FTX_END_CLOSE / PRICE_SERIES[PLAYED_LEN - 1] - 1) * 100)
+
+// ─── TOP: 12/15(마지막 플레이) 이후 흐름 (22.1/24 → 22.6/18) ──
+const TOP_EVENT_IDX = 11   // 22.1/24
+const TOP_END_IDX   = 12   // 22.6/18
+const TOP_EVENT_CLOSE = TOP_PRICE_SERIES[TOP_EVENT_IDX]
+const TOP_END_CLOSE   = TOP_PRICE_SERIES[TOP_END_IDX]
+const TOP_DROP = Math.round((TOP_END_CLOSE / TOP_PRICE_SERIES[TOP_PLAYED_LEN - 1] - 1) * 100)
+
+// ─── NOW: 11/21(마지막 플레이) 이후 흐름 (25.12/19 → 26.6/15) ──
+const NOW_EVENT_IDX = 11   // 25.12/19
+const NOW_END_IDX   = 12   // 26.6/15
+const NOW_EVENT_CLOSE = NOW_PRICE_SERIES[NOW_EVENT_IDX]
+const NOW_END_CLOSE   = NOW_PRICE_SERIES[NOW_END_IDX]
+const NOW_DROP = Math.round((NOW_END_CLOSE / NOW_PRICE_SERIES[NOW_PLAYED_LEN - 1] - 1) * 100)
 
 const SCENARIO_META = {
   doge: {
@@ -189,7 +208,147 @@ const SCENARIO_META = {
     },
     presentLabel: '11/17 기준 평가손익',
     realEventText: 'FTX 파산은 2022년 11월에 실제로 일어난 일입니다.',
-    nextScenarioText: <>다음엔 <b style={{ color: '#1e232b' }}>'21년 도지코인 광풍'</b> 시나리오에서 <b style={{ color: '#1e232b' }}>탐욕장</b>도 경험해보세요.</>,
+    nextScenarioText: <>다음엔 <b style={{ color: '#1e232b' }}>'21년 코인 고점'</b> 시나리오에서 <b style={{ color: '#1e232b' }}>탐욕→공포</b> 전환도 경험해보세요.</>,
+  },
+  top: {
+    label: 'ETH 2021',
+    series: TOP_PRICE_SERIES,
+    played: TOP_PLAYED_LEN,
+    eventIdx: TOP_EVENT_IDX,
+    entryCaption: '10/1 진입',
+    eventTag: '그 이후 · 2022.01~06',
+    eventDayLabel: '1차 급락 시점 (1/24)',
+    aheadLabel: '22.6월까지 갔다면',
+    eventNote: `12/15(${TOP_PRICE_SERIES[TOP_PLAYED_LEN - 1]}만원) 이후: 22.1/24 ${TOP_EVENT_CLOSE}만원 → 22.6/18 ${TOP_END_CLOSE}만원, ${TOP_DROP}%`,
+    chartEventLabel: '1/24',
+    chartFooterEvent: `12/15 이후 ${TOP_DROP}%`,
+    // 트랩 방향: FOMO(고점 매수/보유). "많이 들고 있을수록" 위험 — exposure가 낮을수록 좋다.
+    trapIsBuy: true,
+    epilogue: (charName, exposure, exposurePct, blew) => {
+      if (blew) return {
+        emoji: '📉', title: `${charName}, 조정 국면에서 던졌습니다`,
+        story: `파월 연준의장 연임 발표나 오미크론 쇼크 같은 조정의 공포를 못 이긴 ${charName}은(는) 저점 근처에서 전량 패닉셀했습니다. 아이러니하게도 이더리움은 그 직후 ${TOP_PRICE_SERIES[7]}만원까지 반등하며 사상 최고가를 다시 썼습니다 — 던지지만 않았어도 잡을 수 있던 반등이었죠.`,
+        color: '#c0473d', bg: '#fbeceb',
+      }
+      if (exposure <= 0.45) return {
+        emoji: '🎯', title: '고점 폭락을 피했습니다',
+        story: `${charName}은(는) 고점 부근에서 코인 대부분을 익절해 현금으로 옮겼습니다(종료 시 코인 비중 ${exposurePct}%). 이더리움은 12/15 이후 2022년 1월 ${TOP_EVENT_CLOSE}만원, 루나 사태 등을 거친 6월엔 ${TOP_END_CLOSE}만원까지 폭락했지만 — 그는 이미 빠져나온 뒤였습니다.`,
+        color: '#27865e', bg: '#e7f4ee',
+      }
+      if (exposure <= 0.75) return {
+        emoji: '⚖️', title: '절반은 지켰습니다',
+        story: `${charName}은(는) 일부만 익절하고 코인 ${exposurePct}%를 든 채 고점 국면을 마쳤습니다. 이후 이더리움은 2022년 6월까지 ${TOP_DROP}% 폭락했지만, 미리 덜어낸 절반 덕에 치명상은 면했습니다.`,
+        color: '#b67e1f', bg: '#fbf3e3',
+      }
+      return {
+        emoji: '📉', title: '고점 폭락을 그대로 맞았습니다',
+        story: `${charName}은(는) 고점 물량을 거의 팔지 않고 코인 ${exposurePct}%를 든 채 게임을 마쳤습니다. 이더리움은 이후 2022년 1월 ${TOP_EVENT_CLOSE}만원, 루나 사태를 거친 6월엔 ${TOP_END_CLOSE}만원까지 — ${TOP_DROP}% 추락했습니다. 많이 산 게 죄가 아니라, 취해서 안 판 게 죄였습니다.`,
+        color: '#c0473d', bg: '#fbeceb',
+      }
+    },
+    verdict: (charName, exposure, exposurePct, blew, coherence) => {
+      if (blew) return {
+        color: '#c0473d', bg: '#fbeceb', title: '패닉을 막지 못했습니다',
+        sub: `조정 국면에서 ${charName}의 패닉셀을 막지 못했습니다. 신고가 갱신이 한 번 더 남아있었는데도요.`,
+        mirrorTitle: '공포도 탐욕만큼 비이성적입니다',
+        mirrorBody: "오르다 잠깐 빠지면 '이제 꺾이는 게 아닐까' 싶어지는 건 자연스럽습니다. 그 감각이 당신 근거 선택에도 영향을 미쳤을 거예요.",
+        mirrorIrony: '조정에서 던지는 건 고점에서 추격매수하는 것만큼 비싼 실수입니다.',
+      }
+      if (exposure > 0.75) return {
+        color: '#c0473d', bg: '#fbeceb', title: '팔지 못하고 폭락을 맞았습니다',
+        sub: `${charName}은(는) 고점 물량을 거의 든 채(코인 ${exposurePct}%) 2022년 폭락을 그대로 맞았습니다. 많이 산 게 아니라, 취해서 안 판 게 문제였어요.`,
+        mirrorTitle: '살 땐 과감했지만 팔 줄은 몰랐습니다',
+        mirrorBody: 'FOMO의 진짜 대가는 사는 순간이 아니라 안 파는 순간에 청구됩니다.',
+        mirrorIrony: '당신의 계좌였다면, 사상 최고가를 찍은 그 코인을 미련 없이 팔 수 있었을까요?',
+      }
+      if (coherence >= 60) return {
+        color: '#27865e', bg: '#e7f4ee', title: '설득에 성공했습니다',
+        sub: `${charName}은(는) 끝까지 이성을 유지했어요. 강한 근거로 신뢰도를 높게 유지한 당신 덕분입니다.`,
+        mirrorTitle: '당신은 공탐지수로 말했습니다',
+        mirrorBody: `극단적 탐욕 한복판에서 '지표를 보자'고 말하는 건 쉽지 않습니다. 분위기보다 숫자로 설득한 당신이 있었기에 ${charName}은(는) 고점에서 익절할 수 있었습니다.`,
+        mirrorIrony: "그런데 — 똑같은 상황이 '당신의' 계좌였다면, 이만큼 근거대로 움직일 수 있었을까요?",
+      }
+      return {
+        color: '#b67e1f', bg: '#fbf3e3', title: '아슬아슬하게 버텼습니다',
+        sub: `${charName}은(는) 가까스로 사고를 면했어요. 다만 강한 근거보다 분위기에 기댄 순간이 많았습니다.`,
+        mirrorTitle: '운과 근거 사이',
+        mirrorBody: '몇 번은 공탐지수와 차트로, 몇 번은 뉴스 분위기로 설득했습니다. 이번엔 주사위가 맞았지만, 다음엔 분위기 근거를 한 번 더 골랐을 때 어떻게 될지 모릅니다.',
+        mirrorIrony: '남에겐 "숫자를 보라"고 했죠. 그 말, 다음엔 당신 선택에도 적용해보세요.',
+      }
+    },
+    presentLabel: '12/15 기준 평가손익',
+    realEventText: '이더리움 사상 최고가는 2021년 10~11월에, 이후 2022년 폭락(루나 사태 포함)은 실제로 일어난 일입니다.',
+    nextScenarioText: <>다음엔 <b style={{ color: '#1e232b' }}>'25년 하반기'</b> 시나리오에서 <b style={{ color: '#1e232b' }}>최근 알트코인 장</b>도 경험해보세요.</>,
+  },
+  now: {
+    label: 'SOL 2025',
+    series: NOW_PRICE_SERIES,
+    played: NOW_PLAYED_LEN,
+    eventIdx: NOW_EVENT_IDX,
+    entryCaption: '10/6 진입',
+    eventTag: '그 이후 · 2025.12~2026.06',
+    eventDayLabel: '12월 시점 (12/19)',
+    aheadLabel: "26년 6월까지 갔다면",
+    eventNote: `11/21(${NOW_PRICE_SERIES[NOW_PLAYED_LEN - 1].toLocaleString('ko-KR')}원) 이후: 12/19 ${NOW_EVENT_CLOSE.toLocaleString('ko-KR')}원 → 26.6/15 ${NOW_END_CLOSE.toLocaleString('ko-KR')}원, ${NOW_DROP}%`,
+    chartEventLabel: '12/19',
+    chartFooterEvent: `11/21 이후 ${NOW_DROP}%`,
+    // 트랩 방향: FOMO(저점 매수 유혹). "많이 들고 있을수록" 위험 — exposure가 낮을수록 좋다.
+    trapIsBuy: true,
+    epilogue: (charName, exposure, exposurePct, blew) => {
+      if (blew) return {
+        emoji: '📉', title: `${charName}, 패닉에 던졌습니다`,
+        story: `레버리지 청산이나 ETF 자금유출 같은 공포를 못 이긴 ${charName}은(는) 전량 패닉셀했습니다. 이후 솔라나는 반등 없이 2026년 상반기까지 추가로 흘러내렸으니 방향 자체가 완전히 틀린 건 아니었을지 몰라도, 근거 없이 공포에 떠밀려 던진 건 같았습니다.`,
+        color: '#c0473d', bg: '#fbeceb',
+      }
+      if (exposure <= 0.45) return {
+        emoji: '🎯', title: '추가 하락을 피했습니다',
+        story: `${charName}은(는) 반등할 때마다 물량을 정리해 현금 비중을 늘렸습니다(종료 시 코인 비중 ${exposurePct}%). 솔라나는 11/21 이후에도 반등 없이 12월 ${NOW_EVENT_CLOSE.toLocaleString('ko-KR')}원, 2026년 6월엔 ${NOW_END_CLOSE.toLocaleString('ko-KR')}원까지 더 흘러내렸지만 — 그는 이미 대부분 빠져나온 뒤였습니다.`,
+        color: '#27865e', bg: '#e7f4ee',
+      }
+      if (exposure <= 0.75) return {
+        emoji: '⚖️', title: '절반은 지켰습니다',
+        story: `${charName}은(는) 일부만 정리하고 코인 ${exposurePct}%를 든 채 게임을 마쳤습니다. 이후 시장도 뚜렷한 반등 없이 흘러내렸지만(${NOW_DROP}%), 미리 덜어낸 절반 덕에 손실을 줄였습니다.`,
+        color: '#b67e1f', bg: '#fbf3e3',
+      }
+      return {
+        emoji: '📉', title: '반등을 기다리다 더 크게 잃었습니다',
+        story: `${charName}은(는) "바닥 매집" 신호를 믿고 코인 ${exposurePct}%를 든 채 게임을 마쳤습니다. 하지만 솔라나는 반등 없이 12월 ${NOW_EVENT_CLOSE.toLocaleString('ko-KR')}원, 2026년 6월엔 ${NOW_END_CLOSE.toLocaleString('ko-KR')}원까지 ${NOW_DROP}% 더 흘러내렸습니다. 바닥인 줄 알았던 자리가 바닥이 아니었습니다.`,
+        color: '#c0473d', bg: '#fbeceb',
+      }
+    },
+    verdict: (charName, exposure, exposurePct, blew, coherence) => {
+      if (blew) return {
+        color: '#c0473d', bg: '#fbeceb', title: '패닉을 막지 못했습니다',
+        sub: `반복된 공포 속에서 ${charName}의 패닉셀을 막지 못했습니다.`,
+        mirrorTitle: '공포는 언제나 가장 그럴듯한 이유를 데려옵니다',
+        mirrorBody: "레버리지 청산, ETF 자금유출처럼 매번 새로운 악재가 나오면 '이번엔 진짜 끝'이라는 생각이 자연스럽습니다. 그 감각이 당신 근거 선택에도 영향을 미쳤을 거예요.",
+        mirrorIrony: '바닥에서 던지는 것도, 반등마다 추격매수하는 것도 똑같이 비싼 실수입니다.',
+      }
+      if (exposure > 0.75) return {
+        color: '#c0473d', bg: '#fbeceb', title: '반등을 믿다가 더 크게 물렸습니다',
+        sub: `${charName}은(는) 여러 번의 반등을 진짜라 믿고 코인 비중을 ${exposurePct}%까지 늘렸습니다. 하지만 거래량 없는 반등은 매번 데드캣이었어요.`,
+        mirrorTitle: '내리는 칼날은 몇 번이고 다시 옵니다',
+        mirrorBody: '알트코인 급락장에서 진짜 위험한 건 첫 번째 급락이 아니라, "이제 바닥이겠지"라며 반복해서 물타기하는 순간입니다.',
+        mirrorIrony: '당신의 계좌였다면, 세 번째 반등에서도 "이번엔 진짜"라고 믿지 않을 자신이 있었을까요?',
+      }
+      if (coherence >= 60) return {
+        color: '#27865e', bg: '#e7f4ee', title: '설득에 성공했습니다',
+        sub: `${charName}은(는) 끝까지 이성을 유지했어요. 강한 근거로 신뢰도를 높게 유지한 당신 덕분입니다.`,
+        mirrorTitle: '당신은 거래량으로 말했습니다',
+        mirrorBody: `반등마다 "이번엔 진짜냐"고 묻는 ${charName}에게, 거래량과 온체인 데이터로 데드캣을 구분해준 당신이 있었기에 무모한 추격매수를 피할 수 있었습니다.`,
+        mirrorIrony: "그런데 — 똑같은 상황이 '당신의' 계좌였다면, 반등할 때마다 이만큼 냉정할 수 있었을까요?",
+      }
+      return {
+        color: '#b67e1f', bg: '#fbf3e3', title: '아슬아슬하게 버텼습니다',
+        sub: `${charName}은(는) 가까스로 사고를 면했어요. 다만 강한 근거보다 분위기에 기댄 순간이 많았습니다.`,
+        mirrorTitle: '운과 근거 사이',
+        mirrorBody: '몇 번은 거래량과 온체인 데이터로, 몇 번은 커뮤니티 분위기로 설득했습니다. 이번엔 주사위가 맞았지만, 다음엔 분위기 근거를 한 번 더 골랐을 때 어떻게 될지 모릅니다.',
+        mirrorIrony: '남에겐 "데드캣을 조심하라"고 했죠. 그 말, 다음엔 당신 선택에도 적용해보세요.',
+      }
+    },
+    presentLabel: '11/21 기준 평가손익',
+    realEventText: '25년 하반기 알트코인 급락(10~11월)은 실제 데이터에 기반합니다.',
+    nextScenarioText: <>다음엔 <b style={{ color: '#1e232b' }}>'21년 도지코인 광풍'</b> 시나리오로 돌아가 <b style={{ color: '#1e232b' }}>탐욕장</b>을 비교해보세요.</>,
   },
 }
 
