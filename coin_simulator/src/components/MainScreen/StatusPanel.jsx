@@ -1,5 +1,5 @@
 import { useGameStore } from '../../store/gameStore'
-import { PRICE_SERIES, DOGE_PRICE_SERIES, ENTRY_PRICE, DOGE_ENTRY_PRICE, INVESTED, DOGE_INVESTED, CHARACTERS, REVEAL, DOGE_REVEAL, SRCLABEL, DOGE_DATES, FTX_DATES } from '../../data/gameContent'
+import { CHARACTERS, SRCLABEL, getScenarioData } from '../../data/gameContent'
 
 function trustColor(t) {
   return t < 40 ? '#d65a4e' : t < 70 ? '#dd8a4a' : '#2f9e6f'
@@ -23,14 +23,14 @@ export default function StatusPanel() {
   const investedTotal = useGameStore(s => s.investedTotal)
   const strikes  = useGameStore(s => s.strikes)
 
-  const isDoge      = scenario === 'doge'
-  const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
-  const entryPrice  = isDoge ? DOGE_ENTRY_PRICE  : ENTRY_PRICE
-  const reveal      = isDoge ? DOGE_REVEAL       : REVEAL
-  const priceUnit   = isDoge ? '원' : '만원'
+  const sd          = getScenarioData(scenario)
+  const priceSeries = sd.priceSeries
+  const entryPrice  = sd.entryPrice
+  const reveal      = sd.reveal
+  const priceUnit   = sd.priceUnit
 
   // 현재 시점 날짜 (년월일)
-  const dateArr   = isDoge ? DOGE_DATES : FTX_DATES
+  const dateArr   = sd.dates
   const iso       = dateArr[reveal[turn]] || dateArr[dateArr.length - 1]
   const [dy, dm, dd] = iso.split('-')
   const dateLabel = `${dy}년 ${+dm}월 ${+dd}일`

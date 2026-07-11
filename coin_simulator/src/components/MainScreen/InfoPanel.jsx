@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DOGE_DATES, FTX_DATES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED, CHAR_EVIDENCE_MULT, CHARACTERS } from '../../data/gameContent'
+import { DICT, CHAR_EVIDENCE_MULT, CHARACTERS, getScenarioData } from '../../data/gameContent'
 import PriceChart from './PriceChart'
 import ChartModal from './ChartModal'
 
@@ -121,14 +121,14 @@ export default function InfoPanel() {
   const charHue   = charData?.hue || '#606c7e'
   const charMult  = CHAR_EVIDENCE_MULT[char] || {}
 
-  const isDoge      = scenario === 'doge'
-  const turns       = isDoge ? DOGE_TURNS  : TURNS
-  const reveal      = isDoge ? DOGE_REVEAL : REVEAL
-  const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
-  const coinLabel   = isDoge ? 'DOGE/KRW' : 'BTC/KRW'
-  const chartData   = isDoge ? DOGE_CHART_DATA : FTX_CHART_DATA
-  const chartPlayed = isDoge ? DOGE_CHART_PLAYED : FTX_CHART_PLAYED
-  const dates       = isDoge ? DOGE_DATES : FTX_DATES
+  const sd          = getScenarioData(scenario)
+  const turns       = sd.turns
+  const reveal      = sd.reveal
+  const priceSeries = sd.priceSeries
+  const coinLabel   = sd.coinLabel
+  const chartData   = sd.chartData
+  const chartPlayed = sd.chartPlayed
+  const dates       = sd.dates
   // 헤더 날짜(현재 시점)까지만 캔들을 공개 — 미래 캔들이 미리 보이지 않게
   const headerISO   = dates[reveal[turn]] || dates[dates.length - 1]
   const revealedCount = Math.max(1, chartData.slice(0, chartPlayed).filter(c => c.time <= headerISO).length)
@@ -144,7 +144,7 @@ export default function InfoPanel() {
   const down       = lastPrice < prevPrice
   const lineColor  = down ? '#3a6fd0' : '#d65a4e'
   const fgiColor   = t.fgi < 30 ? '#3a6fd0' : t.fgi < 55 ? '#2f9e6f' : '#d65a4e'
-  const priceUnit  = isDoge ? '원' : '만원'
+  const priceUnit  = sd.priceUnit
   const won = n => Math.round(n).toLocaleString('ko-KR')
 
   const selCount = selectedEvidences.length

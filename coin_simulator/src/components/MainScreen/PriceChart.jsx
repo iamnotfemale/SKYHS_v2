@@ -6,6 +6,65 @@ import { DOGE_BG, DOGE_GAME, FTX_BG, FTX_GAME } from '../../data/marketData'
 // ChartModal이 이 모듈에서 가져다 쓰므로 재수출한다
 export { DOGE_BG, DOGE_GAME, FTX_BG, FTX_GAME }
 
+// ── Upbit KRW-ETH 실데이터 (만원 단위) — 21년 10월 이더리움 고점 ─────
+export const TOP_BG = [
+  { time: '2021-01-01', open: 82,  high: 163, low: 79,  close: 144, volume: 13680035 },
+  { time: '2021-02-01', open: 144, high: 235, low: 141, close: 163, volume: 5333205  },
+  { time: '2021-03-01', open: 163, high: 234, low: 162, close: 233, volume: 2983301  },
+  { time: '2021-04-01', open: 233, high: 332, low: 232, close: 327, volume: 3778037  },
+  { time: '2021-05-01', open: 327, high: 541, low: 218, close: 317, volume: 10418769 },
+  { time: '2021-06-01', open: 317, high: 336, low: 200, close: 264, volume: 5225825  },
+  { time: '2021-07-01', open: 264, high: 296, low: 204, close: 292, volume: 3326704  },
+  { time: '2021-08-01', open: 293, high: 405, low: 287, close: 401, volume: 3011685  },
+  { time: '2021-09-01', open: 401, high: 468, low: 338, close: 366, volume: 2544241  },
+]
+export const TOP_GAME = [
+  { time: '2021-10-01', open: 366, high: 403, low: 365, close: 401, volume: 113116 },
+  { time: '2021-10-08', open: 436, high: 447, low: 432, close: 436, volume: 56829  },
+  { time: '2021-10-19', open: 463, high: 476, low: 461, close: 474, volume: 44383  },
+  { time: '2021-10-21', open: 504, high: 530, low: 495, close: 497, volume: 132665 },
+  { time: '2021-10-28', open: 482, high: 517, low: 475, close: 517, volume: 78326  },
+  { time: '2021-11-09', open: 581, high: 583, low: 567, close: 571, volume: 41429  },
+  { time: '2021-11-22', open: 530, high: 540, low: 508, close: 513, volume: 47879  },
+  { time: '2021-11-26', open: 561, high: 565, low: 511, close: 515, volume: 103690 },
+  { time: '2021-11-30', open: 555, high: 590, low: 543, close: 574, volume: 92563  },
+  { time: '2021-12-04', open: 536, high: 536, low: 438, close: 520, volume: 232043 },
+  { time: '2021-12-15', open: 478, high: 514, low: 455, close: 504, volume: 90285  },
+]
+
+// ── Upbit KRW-SOL 실데이터 (원 단위) — 25년 하반기 알트코인 급락 ────
+export const NOW_BG = [
+  { time: '2025-01-01', open: 282350, high: 454500, low: 262000, close: 354300, volume: 29698682 },
+  { time: '2025-02-01', open: 354200, high: 358000, low: 186100, close: 218650, volume: 15867529 },
+  { time: '2025-03-01', open: 218650, high: 272000, low: 168300, close: 186050, volume: 18503655 },
+  { time: '2025-04-01', open: 186200, high: 225800, low: 143050, close: 213100, volume: 15053024 },
+  { time: '2025-05-01', open: 213050, high: 259450, low: 201600, close: 221350, volume: 10037946 },
+  { time: '2025-06-01', open: 221150, high: 230700, low: 176150, close: 210600, volume: 7685079  },
+  { time: '2025-07-01', open: 210650, high: 279650, low: 199000, close: 240000, volume: 19571463 },
+  { time: '2025-08-01', open: 240000, high: 304600, low: 218800, close: 279800, volume: 29869990 },
+  { time: '2025-09-01', open: 279700, high: 350800, low: 272100, close: 297600, volume: 19458545 },
+]
+export const NOW_GAME = [
+  { time: '2025-10-06', open: 327800, high: 336900, low: 326600, close: 331400, volume: 517956  },
+  { time: '2025-10-09', open: 330200, high: 331500, low: 318800, close: 322700, volume: 553538  },
+  { time: '2025-10-10', open: 322700, high: 326300, low: 271600, close: 292900, volume: 1471822 },
+  { time: '2025-10-14', open: 310700, high: 314900, low: 291000, close: 304100, volume: 1093568 },
+  { time: '2025-10-21', open: 284400, high: 293700, low: 275700, close: 279600, volume: 623278  },
+  { time: '2025-10-29', open: 289500, high: 297700, low: 284900, close: 290000, volume: 502258  },
+  { time: '2025-11-04', open: 247300, high: 252700, low: 218600, close: 233700, volume: 1561673 },
+  { time: '2025-11-10', open: 244300, high: 252000, low: 242000, close: 247500, volume: 613521  },
+  { time: '2025-11-14', open: 219900, high: 221000, low: 205400, close: 211200, volume: 1026700 },
+  { time: '2025-11-18', open: 195800, high: 210700, low: 192500, close: 208400, volume: 949309  },
+  { time: '2025-11-21', open: 200400, high: 202600, low: 183000, close: 193400, volume: 1683480 },
+]
+
+export const SCENARIO_CHART_DATA = {
+  doge: { bg: DOGE_BG, game: DOGE_GAME },
+  ftx:  { bg: FTX_BG,  game: FTX_GAME  },
+  top:  { bg: TOP_BG,  game: TOP_GAME  },
+  now:  { bg: NOW_BG,  game: NOW_GAME  },
+}
+
 // ── 인터벌 집계 ───────────────────────────────────────────────
 function getMondayStr(dateStr) {
   const d = new Date(dateStr)
@@ -82,8 +141,9 @@ export default function PriceChart({ revealedCount, scenario = 'doge' }) {
     chartRef.current = chart
     cancelRef.current = false
 
-    const rawBg   = scenario === 'doge' ? DOGE_BG   : FTX_BG
-    const rawGame = scenario === 'doge' ? DOGE_GAME  : FTX_GAME
+    const cd      = SCENARIO_CHART_DATA[scenario] || SCENARIO_CHART_DATA.doge
+    const rawBg   = cd.bg
+    const rawGame = cd.game
 
     const allGame     = applyInterval(rawGame, interval)
     const revGame     = allGame.slice(0, revealedCount)
