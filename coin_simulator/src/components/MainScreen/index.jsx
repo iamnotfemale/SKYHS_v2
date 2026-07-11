@@ -3,11 +3,13 @@ import { TURNS, DOGE_TURNS, SCENARIOS, CHARACTERS } from '../../data/gameContent
 import InfoPanel   from './InfoPanel'
 import ChatPanel   from './ChatPanel'
 import StatusPanel from './StatusPanel'
+import TutorialOverlay from './TutorialOverlay'
 
 export default function MainScreen() {
   const turn     = useGameStore(s => s.turn)
   const char     = useGameStore(s => s.char)
   const scenario = useGameStore(s => s.scenario)
+  const tutorial = useGameStore(s => s.tutorial)
 
   const charName     = CHARACTERS.find(c => c.id === char)?.name   || ''
   const scenarioName = SCENARIOS.find(s => s.id === scenario)?.name || ''
@@ -45,6 +47,7 @@ export default function MainScreen() {
         <ChatPanel />
         <StatusPanel />
       </div>
+      {tutorial && <TutorialOverlay />}
     </div>
   )
 }

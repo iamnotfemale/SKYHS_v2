@@ -172,6 +172,7 @@ export default function ChatPanel() {
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e4e7ec', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+      <div data-tutorial="persona" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ margin: '14px 0 6px' }}>
         <Avatar face={face} color={color} anim={anim} />
       </div>
@@ -185,12 +186,13 @@ export default function ChatPanel() {
           : <div style={{ fontSize: '15.5px', lineHeight: 1.6, color: '#1e232b', wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>{dialogue}</div>
         }
       </div>
+      </div>
 
       <div style={{ flex: 1, minHeight: '14px' }} />
 
       {/* 조언 선택 */}
       {phase === 'advice' && (
-        <div className="anim-fadeIn" style={{ width: '100%', maxWidth: '470px' }}>
+        <div data-tutorial="advice" className="anim-fadeIn" style={{ width: '100%', maxWidth: '470px' }}>
           <div style={{ fontSize: '12px', fontWeight: 600, color: '#606c7e', marginBottom: '9px' }}>① 어떤 조언을 건넬까요?</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {t.advices.map(a => (

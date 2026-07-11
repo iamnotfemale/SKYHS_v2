@@ -133,7 +133,7 @@ export default function InfoPanel() {
       )}
 
       {/* Chart */}
-      <PanelCard
+      <div data-tutorial="chart"><PanelCard
         title={`${coinLabel} · ${t.chartNote}`} glowColor={evGlow}
         evidencePhase={evidencePhase} src="chart"
         selectedEvidences={selectedEvidences}
@@ -155,10 +155,10 @@ export default function InfoPanel() {
             {chg >= 0 ? '+' : ''}{chg.toFixed(1)}%
           </div>
         </div>
-      </PanelCard>
+      </PanelCard></div>
 
       {/* FGI */}
-      <PanelCard
+      <div data-tutorial="fgi"><PanelCard
         title="공포탐욕지수" glowColor={evGlow}
         evidencePhase={evidencePhase} src="fgi"
         selectedEvidences={selectedEvidences}
@@ -181,10 +181,10 @@ export default function InfoPanel() {
         <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: '#7a8395', marginTop: '7px' }}>
           <span>0 공포</span><span>탐욕 100</span>
         </div>
-      </PanelCard>
+      </PanelCard></div>
 
       {/* News */}
-      <PanelCard
+      <div data-tutorial="news-community"><PanelCard
         title="이 시점의 뉴스" glowColor={evGlow}
         evidencePhase={evidencePhase} src="news"
         selectedEvidences={selectedEvidences}
@@ -221,7 +221,7 @@ export default function InfoPanel() {
             </div>
           ))}
         </div>
-      </PanelCard>
+      </PanelCard></div>
 
       <ChartModal
         open={chartExpanded}
