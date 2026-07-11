@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { CandlestickSeries, HistogramSeries } from 'lightweight-charts'
-import { createDarkChart, DOGE_BG, DOGE_GAME, FTX_BG, FTX_GAME } from './PriceChart'
+import { createDarkChart, SCENARIO_CHART_DATA } from './PriceChart'
 
 function aggregate(candles, keyFn) {
   const map = {}
@@ -42,8 +42,9 @@ export default function ChartModal({ open, onClose, revealedCount, scenario = 'd
     chartRef.current = chart
     cancelRef.current = false
 
-    const rawBg   = scenario === 'doge' ? DOGE_BG   : FTX_BG
-    const rawGame = scenario === 'doge' ? DOGE_GAME  : FTX_GAME
+    const cd = SCENARIO_CHART_DATA[scenario] || SCENARIO_CHART_DATA.doge
+    const rawBg   = cd.bg
+    const rawGame = cd.game
 
     const bgCandles = applyInterval(rawBg, interval)
     const allGame   = applyInterval(rawGame, interval)
@@ -107,7 +108,7 @@ export default function ChartModal({ open, onClose, revealedCount, scenario = 'd
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: '#9099a6', letterSpacing: '.08em' }}>
-            {scenario === 'doge' ? 'DOGE/KRW' : 'BTC/KRW'} · 가격 차트
+            {(SCENARIO_CHART_DATA[scenario] || SCENARIO_CHART_DATA.doge).coinLabel} · 가격 차트
           </div>
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
             {Object.entries(INTERVAL_LABEL).map(([k, label]) => (

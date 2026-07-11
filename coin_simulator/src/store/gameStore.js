@@ -1,8 +1,6 @@
 import { create } from 'zustand'
 import {
-  TURNS, SCORE_TABLE, SRCQ, SRCLABEL, REVEAL, PRICE_SERIES,
-  DOGE_TURNS, DOGE_SCORE_TABLE, DOGE_REVEAL, DOGE_PRICE_SERIES,
-  CHAR_EVIDENCE_MULT,
+  SRCQ, SRCLABEL, CHAR_EVIDENCE_MULT, getScenarioData,
 } from '../data/gameContent'
 
 const initialState = {
@@ -40,7 +38,7 @@ export const useGameStore = create((set, get) => ({
     nextTutorialStep: () => set(s => s.tutorial ? { tutorialStep: s.tutorialStep + 1 } : {}),
     finishTutorial: () => set(s => {
       if (!s.tutorial) return {}
-      const turns = s.scenario === 'doge' ? DOGE_TURNS : TURNS
+      const turns = getScenarioData(s.scenario).turns
       return {
         tutorial: false,
         tutorialStep: 0,
@@ -74,11 +72,11 @@ export const useGameStore = create((set, get) => ({
       const s = get()
       if (s.phase !== 'evidence' || s.selectedEvidences.length === 0) return
 
-      const isDoge      = s.scenario === 'doge'
-      const turns       = isDoge ? DOGE_TURNS  : TURNS
-      const scoreTable  = isDoge ? DOGE_SCORE_TABLE : SCORE_TABLE
-      const reveal      = isDoge ? DOGE_REVEAL : REVEAL
-      const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
+      const sd          = getScenarioData(s.scenario)
+      const turns       = sd.turns
+      const scoreTable  = sd.scoreTable
+      const reveal      = sd.reveal
+      const priceSeries = sd.priceSeries
 
       const t   = turns[s.turn]
       const adv = t.advices.find(a => a.id === s.advice)
@@ -152,7 +150,7 @@ export const useGameStore = create((set, get) => ({
 
     next: () => {
       const s     = get()
-      const turns = s.scenario === 'doge' ? DOGE_TURNS : TURNS
+      const turns = getScenarioData(s.scenario).turns
       if (s.blew || s.turn >= turns.length - 1) {
         set({ screen: 'ending' })
       } else {

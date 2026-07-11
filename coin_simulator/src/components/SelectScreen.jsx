@@ -25,7 +25,7 @@ export default function SelectScreen() {
         <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', letterSpacing: '.16em', color: '#9099a6', textTransform: 'uppercase' }}>Step 1 · 의뢰 선택</div>
         <h1 style={{ fontSize: '28px', fontWeight: 700, margin: '8px 0 4px' }}>누구의, 어떤 패닉을 다룰까요?</h1>
         <p style={{ fontSize: '14px', color: '#707a88', margin: '0 0 26px' }}>
-          데모에서는 <b style={{ color: '#1e232b' }}>21년 도지코인 광풍</b> 시나리오를 4명의 투자자 중 한 명과 끝까지 플레이할 수 있어요. 나머지 시나리오는 곧 공개됩니다.
+          4가지 실제 시장 시나리오를 4명의 투자자 중 한 명과 끝까지 플레이할 수 있어요. 감정축이 서로 다르니 골고루 경험해보세요.
         </p>
 
         {/* Characters */}

@@ -1,5 +1,5 @@
 import { useGameStore } from '../../store/gameStore'
-import { PRICE_SERIES, DOGE_PRICE_SERIES, ENTRY_PRICE, DOGE_ENTRY_PRICE, INVESTED, DOGE_INVESTED, CHARACTERS, REVEAL, DOGE_REVEAL, SRCLABEL } from '../../data/gameContent'
+import { CHARACTERS, SRCLABEL, getScenarioData } from '../../data/gameContent'
 
 function trustColor(t) {
   return t < 40 ? '#d65a4e' : t < 70 ? '#dd8a4a' : '#2f9e6f'
@@ -19,12 +19,12 @@ export default function StatusPanel() {
   const char     = useGameStore(s => s.char)
   const scenario = useGameStore(s => s.scenario)
 
-  const isDoge      = scenario === 'doge'
-  const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
-  const entryPrice  = isDoge ? DOGE_ENTRY_PRICE  : ENTRY_PRICE
-  const reveal      = isDoge ? DOGE_REVEAL       : REVEAL
-  const invested    = isDoge ? DOGE_INVESTED     : INVESTED
-  const priceUnit   = isDoge ? '원' : '만원'
+  const sd          = getScenarioData(scenario)
+  const priceSeries = sd.priceSeries
+  const entryPrice  = sd.entryPrice
+  const reveal      = sd.reveal
+  const invested    = sd.invested
+  const priceUnit   = sd.priceUnit
 
   const charData  = CHARACTERS.find(c => c.id === char)
   const charName  = charData?.name || ''

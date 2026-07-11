@@ -1,11 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import {
-  TURNS, DOGE_TURNS, CHARACTERS, PRICE_SERIES, DOGE_PRICE_SERIES,
-  ENTRY_PRICE, DOGE_ENTRY_PRICE, REVEAL, DOGE_REVEAL,
-  SRCLABEL,
-  getSystemPrompt, buildSayPrompt, buildDogeSayPrompt,
-  buildReflectPrompt, buildDogeReflectPrompt,
+  CHARACTERS, SRCLABEL, getSystemPrompt, getScenarioData,
 } from '../../data/gameContent'
 import { useClaude } from '../../hooks/useClaude'
 
@@ -65,11 +61,11 @@ export default function ChatPanel() {
   const prevTurnRef   = useRef(-1)
   const prevResultRef = useRef(null)
 
-  const isDoge      = scenario === 'doge'
-  const turns       = isDoge ? DOGE_TURNS  : TURNS
-  const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
-  const entryPrice  = isDoge ? DOGE_ENTRY_PRICE  : ENTRY_PRICE
-  const reveal      = isDoge ? DOGE_REVEAL : REVEAL
+  const sd          = getScenarioData(scenario)
+  const turns       = sd.turns
+  const priceSeries = sd.priceSeries
+  const entryPrice  = sd.entryPrice
+  const reveal      = sd.reveal
 
   const t        = turns[turn]
   const charData = CHARACTERS.find(c => c.id === char)
@@ -85,10 +81,10 @@ export default function ChatPanel() {
 
     const price  = priceSeries[reveal[turn]]
     const pct    = (price / entryPrice - 1) * 100
-    const prompt = isDoge ? buildDogeSayPrompt(turn, price, pct) : buildSayPrompt(turn, price, pct)
+    const prompt = sd.buildSayPrompt(turn, price, pct)
     const sys    = getSystemPrompt(char, scenario)
     generate(prompt, sys).then(text => { if (text) setGeminiSay(text) })
-  }, [turn, generate, isDoge, char, scenario])
+  }, [turn, generate, char, scenario])
 
   // stage 3 도달 → Gemini reflect 생성
   useEffect(() => {
@@ -97,10 +93,10 @@ export default function ChatPanel() {
     prevResultRef.current = result
     setReflectReady(true)
 
-    const prompt = isDoge ? buildDogeReflectPrompt(result) : buildReflectPrompt(result)
+    const prompt = sd.buildReflectPrompt(result)
     const sys    = getSystemPrompt(char, scenario)
     generate(prompt, sys).then(text => { if (text) setGeminiReflect(text) })
-  }, [result, stage, reflectReady, generate, isDoge, char, scenario])
+  }, [result, stage, reflectReady, generate, char, scenario])
 
   const inResult = phase === 'result'
 

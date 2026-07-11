@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { TURNS, DOGE_TURNS, REVEAL, DOGE_REVEAL, PRICE_SERIES, DOGE_PRICE_SERIES, DICT, DOGE_CHART_DATA, FTX_CHART_DATA, DOGE_CHART_PLAYED, FTX_CHART_PLAYED, CHAR_EVIDENCE_MULT, CHARACTERS } from '../../data/gameContent'
+import { DICT, CHAR_EVIDENCE_MULT, CHARACTERS, getScenarioData } from '../../data/gameContent'
 import PriceChart from './PriceChart'
 import ChartModal from './ChartModal'
 
@@ -91,13 +91,11 @@ export default function InfoPanel() {
   const charHue   = charData?.hue || '#606c7e'
   const charMult  = CHAR_EVIDENCE_MULT[char] || {}
 
-  const isDoge      = scenario === 'doge'
-  const turns       = isDoge ? DOGE_TURNS  : TURNS
-  const reveal      = isDoge ? DOGE_REVEAL : REVEAL
-  const priceSeries = isDoge ? DOGE_PRICE_SERIES : PRICE_SERIES
-  const coinLabel   = isDoge ? 'DOGE/KRW' : 'BTC/KRW'
-  const chartData   = isDoge ? DOGE_CHART_DATA : FTX_CHART_DATA
-  const chartPlayed = isDoge ? DOGE_CHART_PLAYED : FTX_CHART_PLAYED
+  const sd          = getScenarioData(scenario)
+  const turns       = sd.turns
+  const reveal      = sd.reveal
+  const priceSeries = sd.priceSeries
+  const coinLabel   = sd.coinLabel
   const revealedCount = (reveal[turn] ?? 2) + 1
 
   const t             = turns[turn]
@@ -111,7 +109,7 @@ export default function InfoPanel() {
   const down       = lastPrice < prevPrice
   const lineColor  = down ? '#3a6fd0' : '#d65a4e'
   const fgiColor   = t.fgi < 30 ? '#3a6fd0' : t.fgi < 55 ? '#2f9e6f' : '#d65a4e'
-  const priceUnit  = isDoge ? '원' : '만원'
+  const priceUnit  = sd.priceUnit
   const won = n => Math.round(n).toLocaleString('ko-KR')
 
   const selCount = selectedEvidences.length
