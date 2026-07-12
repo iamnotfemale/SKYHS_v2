@@ -7,7 +7,7 @@ import {
 } from '../../data/gameContent'
 import {
   ADVICE_DIRS, CLASSIFY_SYSTEM_PROMPT, buildClassifyPrompt, classifyLocally,
-  buildReflectPromptV2,
+  buildReflectPromptV2, stripWrappingQuotes,
 } from '../../data/prompts'
 import { useClaude } from '../../hooks/useClaude'
 
@@ -102,7 +102,7 @@ export default function ChatPanel() {
     const canBuyNow = useGameStore.getState().cash > 0
     const prompt = sd.buildSayPrompt(turn, price, pct, canBuyNow)
     const sys    = getSystemPrompt(char, scenario)
-    generate(prompt, sys).then(text => { if (text) setGeminiSay(text) })
+    generate(prompt, sys).then(text => { if (text) setGeminiSay(stripWrappingQuotes(text)) })
   }, [turn, generate, scenario, char])
 
   // stage 3 도달 → Gemini reflect 생성
@@ -114,7 +114,7 @@ export default function ChatPanel() {
 
     const prompt = buildReflectPromptV2(result, charName)
     const sys    = getSystemPrompt(char, scenario)
-    generate(prompt, sys).then(text => { if (text) setGeminiReflect(text) })
+    generate(prompt, sys).then(text => { if (text) setGeminiReflect(stripWrappingQuotes(text)) })
   }, [result, stage, reflectReady, generate, char, scenario, charName])
 
   const inResult       = phase === 'result'

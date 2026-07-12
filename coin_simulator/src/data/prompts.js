@@ -41,17 +41,25 @@ export function classifyLocally(raw) {
 }
 
 // ─── ④ 근거 반응형 reflect — 플레이어의 해석 문장을 되받아친다 ─
+// 캐릭터는 채점 결과나 신뢰도 수치를 모른다. 점수·라벨은 전부 '겪은 사람의 체감'으로 번역해서 넘긴다.
 export function buildReflectPromptV2(result, charName) {
-  const supportsLabel = {
-    support: '조언을 뒷받침하는 올바른 해석',
-    contra:  '조언과 모순되는 해석',
-    bad:     '틀린 해석(오독)',
+  const feelLabel = {
+    support: '납득함',
+    contra:  '조언과 앞뒤가 안 맞아 갸웃함',
+    bad:     '사실과 달라 보여 미심쩍음',
   }
   const evLines = (result.evidences || []).map((e, i) => {
-    const body  = e.text ? `"${e.text}"` : (e.srcLabel || e.src || '근거')
-    const label = supportsLabel[e.supports] || '근거'
-    return `${i + 1}. ${body} — ${label} (신뢰도 영향 ${e.weightedDelta >= 0 ? '+' : ''}${e.weightedDelta})`
+    const body = e.text ? `"${e.text}"` : (e.srcLabel || e.src || '무언가')
+    return `${i + 1}. ${body}  [속마음: ${feelLabel[e.supports] || '흘려들음'}]`
   }).join('\n')
+
+  const delta = (result.tA ?? 0) - (result.tB ?? 0)
+  const trustLine =
+    delta >=  10 ? '이 사람 말이라면 이제 믿어도 되겠다 싶다.'
+  : delta >    0 ? '이 사람 말이 조금은 미덥게 느껴진다.'
+  : delta === 0  ? '이 사람에 대한 마음은 딱히 달라지지 않았다.'
+  : delta >  -10 ? '이 사람 말이 살짝 미심쩍어졌다.'
+  :                '이 사람을 계속 믿어도 되는지 의심이 든다.'
 
   const outcomeMap = {
     good:  '이성을 되찾고 조언을 따랐다',
@@ -61,18 +69,27 @@ export function buildReflectPromptV2(result, charName) {
 
   const interventionLine = result.intervention?.attempted
     ? (result.intervention.success
-        ? `\n- 폭주 직전, 상담가가 "${result.intervention.text}"라는 마지막 한마디로 당신을 멈춰 세웠다.`
-        : '\n- 폭주 직전 상담가가 한 번 더 설득했지만 통하지 않았다.')
+        ? `\n폭주 직전, 상담가가 "${result.intervention.text}"라는 마지막 한마디로 당신을 멈춰 세웠다.`
+        : '\n폭주 직전 상담가가 한 번 더 붙잡았지만 소용없었다.')
     : ''
 
-  return `상담가의 조언: "${result.advice}"
-상담가가 제시한 근거들:
-${evLines || '(제시된 근거 없음)'}
-신뢰도 변화: ${result.tB}% → ${result.tA}%
-결과: 당신(${charName})은 ${outcomeMap[result.outcome] || result.outcome}.${interventionLine}
+  return `상담가가 당신에게 건넨 말: "${result.advice}"
 
-위 상담을 겪은 직후, 당신이 상담가에게 짧게 한마디 합니다.
-- 상담가가 낸 근거 중 가장 인상적이었던(또는 가장 이상했던) 구체적인 문장 하나를 직접 되받아치며 반응하세요.
-  틀린 해석(오독)이었다면 "그 얘긴 좀 이상하던데요…"처럼 갸웃하고, 올바른 해석이었다면 그 논리를 언급하며 수긍하세요.
-- 캐릭터의 말투를 유지하세요. 1~2문장, 대사만 출력하세요.`
+상담가가 그렇게 말하며 짚어준 것들. 대괄호는 그때 당신이 속으로 든 느낌입니다:
+${evLines || '(상담가는 이렇다 할 이유를 대주지 않았다)'}
+
+그 뒤에 벌어진 일: 당신(${charName})은 ${outcomeMap[result.outcome] || result.outcome}.${interventionLine}
+지금 상담가를 향한 당신의 마음: ${trustLine}
+
+이 일을 겪은 직후, 상담가에게 짧게 한마디 하세요.
+- 위에서 상담가가 짚어준 것 중 딱 하나만 고르세요. 가장 마음에 남았거나, 가장 이상했던 것 하나입니다.
+- 고른 그 이야기의 내용을 당신 입말로 되짚으며 반응하세요. 미심쩍었던 것이면 갸웃하고, 납득한 것이면 수긍하면 됩니다.
+- 대괄호 안의 속마음은 참고용 메모일 뿐입니다. 그 표현을 대사에 그대로 옮기지 마세요.
+- 캐릭터의 말투를 유지하세요. 최대 3문장, 대사만 출력하세요.`
+}
+
+// LLM이 대사 전체를 따옴표로 감싸 내보내는 버릇이 잦다. 감싼 짝만 벗기고 대사 안의 인용은 보존한다.
+export function stripWrappingQuotes(raw) {
+  const s = (raw || '').trim()
+  return /^["'“”「『]/.test(s) && /["'“”」』]$/.test(s) ? s.slice(1, -1).trim() : s
 }
